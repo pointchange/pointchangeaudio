@@ -1,0 +1,1 @@
+export const songTypeArray = ['AIFF', 'AIFF-C', 'AAC', 'APE', 'ASF', 'BWF', 'DSDIFF', 'DSF', 'FLAC', 'MP2', 'Matroska', 'MP3', 'MPC', 'MPEG 4', 'Ogg', 'Opus', 'Speex', 'Theora', 'Vorbis', 'WAV', 'WebM', 'WV', 'WMA', 'm4a', 'm4b'];
