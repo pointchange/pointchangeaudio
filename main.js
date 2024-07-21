@@ -1,46 +1,50 @@
-// import { BrowserWindow, app, protocol, ipcMain, dialog, Menu, Tray, shell } from 'electron'
-// import path, { basename, join } from 'node:path';
-// import { createReadStream } from 'original-fs';
-// import { stat, readdir, unlink } from 'node:fs/promises';
+import { BrowserWindow, app, protocol, ipcMain, dialog, Menu, Tray, shell } from 'electron'
+import path, { basename, join } from 'node:path';
+import { createReadStream } from 'original-fs';
+import { stat, readdir, unlink } from 'node:fs/promises';
 
-// import { fileURLToPath } from 'node:url'
+import { fileURLToPath } from 'node:url'
 
-// import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg';
-// import ffmpeg from 'fluent-ffmpeg';
-// import { path as ffprobePath } from '@ffprobe-installer/ffprobe';
-// import { filterNotSongType } from './util/fiterSong.js';
-// import { getMusicInfo } from './util/getSongInfo.js';
+import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg';
+import ffmpeg from 'fluent-ffmpeg';
+import { path as ffprobePath } from '@ffprobe-installer/ffprobe';
+import { filterNotSongType } from './util/fiterSong.js';
+import { getMusicInfo } from './util/getSongInfo.js';
 
-const { BrowserWindow, app, protocol, ipcMain, dialog, Menu, Tray, shell } = require('electron')
-const { basename, join } = require('node:path');
-const { createReadStream } = require('original-fs');
-const { stat, readdir, unlink } = require('node:fs/promises');
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg');
-const ffmpeg = require('fluent-ffmpeg');
-const ffprobePath = require('@ffprobe-installer/ffprobe');
-const { filterNotSongType } = require('./util/fiterSong.js');
-const { getMusicInfo } = require('./util/getSongInfo.js');
+// const { BrowserWindow, app, protocol, ipcMain, dialog, Menu, Tray, shell } = require('electron')
+// const { basename, join } = require('node:path');
+// const { createReadStream } = require('original-fs');
+// const { stat, readdir, unlink } = require('node:fs/promises');
+// const ffmpegPath = require('@ffmpeg-installer/ffmpeg');
+// const ffmpeg = require('fluent-ffmpeg');
+// const ffprobePath = require('@ffprobe-installer/ffprobe');
+// const { filterNotSongType } = require('./util/fiterSong.js');
+// const { getMusicInfo } = require('./util/getSongInfo.js');
 
 // ffmpeg.setFfmpegPath(ffmpegPath.path);
 // ffmpeg.setFfprobePath(ffprobePath.path);
-ffmpeg.setFfmpegPath(ffmpegPath.path.replace('app.asar', 'app.asar.unpacked'));
-ffmpeg.setFfprobePath(ffprobePath.path.replace('app.asar', 'app.asar.unpacked'));
-// const __filenameNew = fileURLToPath(import.meta.url);
+// ffmpeg.setFfmpegPath(ffmpegPath.path.replace('app.asar', 'app.asar.unpacked'));
+// ffmpeg.setFfprobePath(ffprobePath.path.replace('app.asar', 'app.asar.unpacked'));
 
-// const __dirnameNew = path.dirname(__filenameNew);
+const __filenameNew = fileURLToPath(import.meta.url);
 
-// const iconsPath = {
-//     pause: join(__dirnameNew, './images/pause.png'),
-//     play: join(__dirnameNew, './images/play.png'),
-//     winIcon: join(__dirnameNew, './images/favicon-16x16.png'),
-//     relaunchIcon: join(__dirnameNew, './images/favicon.ico'),
-// };
+const __dirnameNew = path.dirname(__filenameNew);
+
 const iconsPath = {
-    pause: join(__dirname, './images/pause.png'),
-    play: join(__dirname, './images/play.png'),
-    winIcon: join(__dirname, './images/favicon-16x16.png'),
-    relaunchIcon: join(__dirname, './images/favicon.ico'),
+    pause: join(__dirnameNew, './images/pause.png'),
+    play: join(__dirnameNew, './images/play.png'),
+    winIcon: join(__dirnameNew, './images/favicon-16x16.png'),
+    relaunchIcon: join(__dirnameNew, './images/favicon.ico'),
 };
+
+ffmpeg.setFfmpegPath(ffmpegPath.replace('app.asar', 'app.asar.unpacked'));
+ffmpeg.setFfprobePath(ffprobePath.replace('app.asar', 'app.asar.unpacked'));
+// const iconsPath = {
+//     pause: join(__dirname, './images/pause.png'),
+//     play: join(__dirname, './images/play.png'),
+//     winIcon: join(__dirname, './images/favicon-16x16.png'),
+//     relaunchIcon: join(__dirname, './images/favicon.ico'),
+// };
 
 protocol.registerSchemesAsPrivileged([
     {
@@ -71,15 +75,15 @@ function createWindow() {
         width: 1200,
         height: 750,
         show: false,
-        icon: join(__dirname, './images/chrome-256x256.ico'),
+        icon: join(__dirnameNew, './images/chrome-256x256.ico'),
         webPreferences: {
             nodeIntegration: true,
-            // preload: join(__dirname, './preload/index.mjs'),
-            preload: join(__dirname, './preload/index.js'),
+            // preload: join(__dirnameNew, './preload/index.mjs'),
+            preload: join(__dirnameNew, './preload/index.mjs'),
         },
     });
     // win.loadURL('http://localhost:5173/');
-    win.loadFile(join(__dirname, './dist/index.html'));
+    win.loadFile(join(__dirnameNew, './dist/index.html'));
     ipcMain.handle('on-get-position', (e, x, y) => {
         win.setPosition(x, y)
     })
@@ -216,12 +220,12 @@ app.whenReady().then(() => {
             webPreferences: {
                 devTools: false,
                 nodeIntegration: true,
-                // preload: join(__dirname, './preload/vue_child.mjs'),
-                preload: join(__dirname, './preload/vue_child.js'),
+                // preload: join(__dirnameNew, './preload/vue_child.mjs'),
+                preload: join(__dirnameNew, './preload/vue_child.mjs'),
             }
         });
         // winChild.loadURL('http://localhost:5174/');
-        winChild.loadFile(join(__dirname, './vue_child/dist/index.html'));
+        winChild.loadFile(join(__dirnameNew, './vue_child/dist/index.html'));
         winChild.on('ready-to-show', () => {
             winChild.show();
             winChild.setAlwaysOnTop(true);

@@ -98,15 +98,15 @@ list:[
     const __dirname = dirname(__filename)
     ```
 
-    >在某些地方还是使用CommonJS。综合还得是跟着官网规范来，它是CommonJS，就用CommonJS，老实的等完善的ESM转换。
+    - 使用CommonJS导入。
 
-2. preload.js 文件里使用ES Modules规范引入electron 文件无法挂载到window全局对象上，很迷。具体报错信息：```Uncaught ReferenceError: electron is not defined```，后来发现改后缀mjs+webPreferences的```nodeIntegration: true```，总之使用CommonJS规范就好。
+2. preload.js 文件里使用ES Modules规范引入electron 文件无法挂载到window全局对象上，很迷。具体报错信息：```Uncaught ReferenceError: electron is not defined```，后来发现改后缀mjs+webPreferences的```nodeIntegration: true```，问题解决。
 
 ### electron 项目打包
 
 1. Electron Forge 一体化打包，省事；但本项目音频转换依赖ffmpeg，打包后屡次报错，path正确，但就是报错，目前还没解决。。。
 
-2. electron-builder 很成熟的打包工具，在 package.json 配置好build
+2. electron-builder 很成熟的打包工具，无论用 cmd 还是 esM 都支持。在 package.json 配置好build
 
 ```json
 "build": {

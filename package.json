@@ -6,6 +6,7 @@
   "main": "main.js",
   "author": "pointchange",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "pack": "electron-builder --dir",
     "dist": "electron-builder",

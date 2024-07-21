@@ -10,5 +10,5 @@ function filterNotSongType(dirAndFileArray) {
         }
     });
 }
-module.exports = { filterNotSongType };
-// export { filterNotSongType }
+// module.exports = { filterNotSongType };
+export { filterNotSongType }

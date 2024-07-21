@@ -1,5 +1,5 @@
-const { ipcRenderer, contextBridge } = require("electron");
-// import { ipcRenderer, contextBridge } from "electron";
+// const { ipcRenderer, contextBridge } = require("electron");
+import { ipcRenderer, contextBridge } from "electron";
 
 contextBridge.exposeInMainWorld('electron', {
     onMsg: callback => ipcRenderer.on('on-msg', callback),

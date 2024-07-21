@@ -27,5 +27,5 @@ contextBridge.exposeInMainWorld('electron', {
     minimizableWin: bool => ipcRenderer.invoke('on-minimizable-win', bool),
     onSendPositionXY: callback => ipcRenderer.on('on-send-position-xy', callback),
     getPositionXY: (x, y) => ipcRenderer.invoke('on-get-position', x, y),
-
+    onSwitchSong: callback => ipcRenderer.on('on-switch-song', callback),
 })

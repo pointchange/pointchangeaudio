@@ -1,20 +1,23 @@
-// import { stat } from 'node:fs/promises';
-// import { parseFile } from 'music-metadata';
-// import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg';
-// import ffmpeg from 'fluent-ffmpeg';
-// import { path as ffprobePath } from '@ffprobe-installer/ffprobe';
+import { stat } from 'node:fs/promises';
+import { parseFile } from 'music-metadata';
+import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg';
+import ffmpeg from 'fluent-ffmpeg';
+import { path as ffprobePath } from '@ffprobe-installer/ffprobe';
 
-const { stat } = require('node:fs/promises');
+// const { stat } = require('node:fs/promises');
 // const parseFile = require('music-metadata').default;
 // import { parseFile } from 'music-metadata';
 
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg');
-const ffmpeg = require('fluent-ffmpeg');
-const ffprobePath = require('@ffprobe-installer/ffprobe');
+// const ffmpegPath = require('@ffmpeg-installer/ffmpeg');
+// const ffmpeg = require('fluent-ffmpeg');
+// const ffprobePath = require('@ffprobe-installer/ffprobe');
 // ffmpeg.setFfmpegPath(ffmpegPath.path);
 // ffmpeg.setFfprobePath(ffprobePath.path);
-ffmpeg.setFfmpegPath(ffmpegPath.path.replace('app.asar', 'app.asar.unpacked'));
-ffmpeg.setFfprobePath(ffprobePath.path.replace('app.asar', 'app.asar.unpacked'));
+// ffmpeg.setFfmpegPath(ffmpegPath.path.replace('app.asar', 'app.asar.unpacked'));
+// ffmpeg.setFfprobePath(ffprobePath.path.replace('app.asar', 'app.asar.unpacked'));
+
+ffmpeg.setFfmpegPath(ffmpegPath.replace('app.asar', 'app.asar.unpacked'));
+ffmpeg.setFfprobePath(ffprobePath.replace('app.asar', 'app.asar.unpacked'));
 //失败统一false
 function hasOwnPropertyDouble(obj, property1, property2) {
     if (!obj.hasOwnProperty(property1)) return false;
@@ -60,7 +63,7 @@ async function getMusicInfo(audioArray) {
         //     artist,
         //     album,
         // })
-        const { parseFile } = await import('music-metadata');
+        // const { parseFile } = await import('music-metadata');
         const metadata = await parseFile(path);
         const info = await stat(path);
 
@@ -95,10 +98,10 @@ async function getMusicInfo(audioArray) {
     //文件路径 文件名
     return songList;
 }
-// export { getMusicInfo };
-module.exports = {
-    getMusicInfo
-}
+export { getMusicInfo };
+// module.exports = {
+//     getMusicInfo
+// }
 
 // export async function getAudioInfo(path){
 //     const metadata = await parseFile(path);
