@@ -1,4 +1,5 @@
 import { BrowserWindow, app, protocol, ipcMain, dialog, Menu, Tray, shell } from 'electron'
+import bool from 'electron-squirrel-startup';
 import path, { basename, join } from 'node:path';
 import { createReadStream } from 'original-fs';
 import { stat, readdir, unlink } from 'node:fs/promises';
@@ -10,6 +11,7 @@ import ffmpeg from 'fluent-ffmpeg';
 import { path as ffprobePath } from '@ffprobe-installer/ffprobe';
 import { filterNotSongType } from './util/fiterSong.js';
 import { getMusicInfo } from './util/getSongInfo.js';
+if (bool) app.quit();
 
 // const { BrowserWindow, app, protocol, ipcMain, dialog, Menu, Tray, shell } = require('electron')
 // const { basename, join } = require('node:path');

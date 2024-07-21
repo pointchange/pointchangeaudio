@@ -10,7 +10,7 @@
   "scripts": {
     "pack": "electron-builder --dir",
     "dist": "electron-builder",
-    "start": "nodemon --exec electron . --watch ./ --ext .js,.html,.css,.vue",
+    "start": "electron-forge start",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -27,12 +27,6 @@
     "music-metadata": "^8.3.0"
   },
   "devDependencies": {
-    "@element-plus/icons-vue": "^2.3.1",
-    "pinia": "^2.1.7",
-    "pinia-plugin-persistedstate": "^3.2.1",
-    "vue": "^3.4.21",
-    "vue-router": "^4.3.2",
-    "element-plus": "^2.7.6",
     "@electron-forge/cli": "^7.4.0",
     "@electron-forge/maker-deb": "^7.4.0",
     "@electron-forge/maker-rpm": "^7.4.0",
@@ -41,11 +35,17 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.4.0",
     "@electron-forge/plugin-fuses": "^7.4.0",
     "@electron/fuses": "^1.8.0",
+    "@element-plus/icons-vue": "^2.3.1",
     "@vitejs/plugin-vue": "^5.0.4",
     "cross-env": "^7.0.3",
     "electron": "^30.0.9",
     "electron-builder": "^24.13.3",
-    "vite": "^5.2.8"
+    "element-plus": "^2.7.6",
+    "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^3.2.1",
+    "vite": "^5.2.8",
+    "vue": "^3.4.21",
+    "vue-router": "^4.3.2"
   },
   "build": {
     "appId": "com.pointchange.audio",
@@ -82,6 +82,36 @@
       "installerHeaderIcon": "images/chrome-256x256.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
+    }
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {
+        "asar": true,
+        "name": "pointchangeaudio",
+        "executableName": "pointchangeaudio(PCA)",
+        "icon": "./images/chrome-256x256"
+      },
+      "makers": [
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "win32"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "setupIcon": "./images/chrome-256x256.ico"
+          }
+        }
+      ],
+      "plugins": [
+        {
+          "name": "@electron-forge/plugin-auto-unpack-natives",
+          "config": {}
+        }
+      ]
     }
   }
 }
