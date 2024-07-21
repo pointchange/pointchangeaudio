@@ -2,6 +2,12 @@
 
 关闭数据连接，远离网络的嘈杂，感受生活带来的生机，带上一副耳机，倾听你我心声。PCA ( point change audio ) 本地音乐播放器。
 
+## 下载
+
+1. [阿里云盘](https://www.alipan.com/s/6eB9FvSM2VX)
+
+2. [夸克网盘](https://pan.quark.cn/s/c926b1c0441d)
+
 ## 项目介绍
 
 PCA是基于 electron、vue3 的桌面应用 —— **本地音乐播放器**，无需联网，无网络请求。随着HTML5时代的发展，audio元素支持的音频类型越来越多，常见的 MP3、OGG、FLAC等类型的音频文件都能播放；但有些类型例如APE、WMA等音频文件经过测试不能播放，甚至识别不出文件类型。为了兼容不支持的音频类型，做了个**简易的音频转换器**，它集成在本地音乐播放器里，稍微等待几秒既能转换完成；同时拥有多个**主题**，多种色彩；心情不好，换个主题，换个心情，快来体验吧。
@@ -65,6 +71,8 @@ list:[
 
 3. 设置：一键初始化本应用、主题切换、一键初始化主题。
 
+4. 点击左上角 图标 logo 启动音频可视化。
+
 ## 项目启动
 
 1. pointchangeaudio目录下```npm start```
@@ -96,8 +104,9 @@ list:[
 
 ### electron 项目打包
 
-1.Electron Forge 一体化打包，省事；但本项目音频转换依赖ffmpeg，打包后屡次报错，path正确，但就是报错，目前还没解决。。。
-2.electron-builder 很成熟的打包工具，在 package.json 配置好build
+1. Electron Forge 一体化打包，省事；但本项目音频转换依赖ffmpeg，打包后屡次报错，path正确，但就是报错，目前还没解决。。。
+
+2. electron-builder 很成熟的打包工具，在 package.json 配置好build
 
 ```json
 "build": {
