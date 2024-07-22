@@ -104,7 +104,43 @@ list:[
 
 ### electron 项目打包
 
-1. Electron Forge 一体化打包，省事；但本项目音频转换依赖ffmpeg，打包后屡次报错，path正确，但就是报错，目前还没解决。。。
+1. Electron Forge 一体化打包，省事；但本项目音频转换依赖ffmpeg，打包后屡次报错，path正确，但就是报错，一般ffmpeg 等.exe文件打包在app.asar.unpack中才合适。
+
+    ```js
+      "config": {
+        "forge": {
+          "packagerConfig": {
+            "asar": true,//electron 内置压缩
+            "name": "pointchangeaudio",// 应用程序的名称
+            "executableName": "pointchangeaudio(PCA)",//执行文件的名称
+            "icon": "./images/chrome-256x256"//应用程序的图标路径 (无需后缀)
+          },
+          "makers": [
+            {
+              "name": "@electron-forge/maker-zip",//压缩包 
+              "platforms": [
+                "win32"//window平台
+              ]
+            },
+            {
+              "name": "@electron-forge/maker-squirrel",//Windows的.exe安装包
+              "config": {
+                "setupIcon": "./images/chrome-256x256.ico"
+              }
+            }
+          ],
+          //插件
+          "plugins": [
+            {
+              //自动解包本机模块插件
+              //此插件会自动将node_modules文件夹中的所有本机Node模块添加到asar.unpack文件夹中的packagerConfig配置选项中
+              "name": "@electron-forge/plugin-auto-unpack-natives",
+              "config": {}
+            }
+          ]
+        }
+      }
+    ```
 
 2. electron-builder 很成熟的打包工具，无论用 cmd 还是 esM 都支持。在 package.json 配置好build
 

@@ -87,7 +87,14 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "asar": true,
+        "asar": {
+          "ListOptions": {
+            "isPack": true
+          },
+          "CreateOptions": {
+            "unpackDir": "./node_modules/@ffmpeg-installer"
+          }
+        },
         "name": "pointchangeaudio",
         "executableName": "pointchangeaudio(PCA)",
         "icon": "./images/chrome-256x256"
