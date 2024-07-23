@@ -99,7 +99,9 @@ function minimizableHandler(){
       <el-header>
         <el-page-header class="header" title="PCA">
           <template #icon>
-            <img src="./assets/favicon-16x16.png" alt="" @click="clickHandler">
+            <div class="img-container">
+              <img class="img" src="./assets/favicon-16x16.png" alt="" @click="clickHandler">
+            </div>
           </template>
           <template #content>
             <span class="text-mini"> {{store.audioInfo.title}} </span>
@@ -155,6 +157,32 @@ function minimizableHandler(){
   
 </template>
 <style>
+.img-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+.img-container::after{
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: -1px;
+  border:1px solid var(--el-color-primary-light-6);
+  width: 16px;
+  height: 16px;
+  z-index: 100;
+  border-radius: 50%;
+  transform-origin: center;
+  animation: imgAnimation 2s infinite;
+}
+
+.img-container img{
+  width: 100%;
+  height: 100%;
+}
 .text-mini{
   font-size: var(--el-font-size-extra-small)
 }

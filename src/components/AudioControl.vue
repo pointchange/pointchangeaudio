@@ -100,7 +100,10 @@ function changePlayOrder(){
       <div class="control-container">
         <el-page-header class="el-page-header-ele" title=" ">
           <template #icon>
-            <el-image style="width: 80px; height: 80px" :src="store.audioInfo.pic?store.audioInfo.pic:''" fit="fill" />
+            <el-image style="width: 80px; height: 80px" 
+            :src="store.audioInfo.pic?`data:${store.audioInfo.pic.format};base64,${store.audioInfo.pic.data.toString('base64')}`:''" 
+            
+            fit="fill" />
           </template>
           <template #content>
             <el-button :disabled="!isEmpty" class="el-button-icon" circle size="large" type="" text="" plain :icon="ArrowLeft" @click="()=>preSong(store.audioInfo.path)"></el-button>

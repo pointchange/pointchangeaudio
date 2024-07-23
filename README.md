@@ -59,6 +59,10 @@ list:[
 | [ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg) | 处理和操纵音频 |
 | [music-metadata](https://github.com/Borewit/music-metadata) | 读取音频元信息 |
 
+## 版本0.0.1
+
+1. 修改部分bug，增添可视化音频入口动画
+
 ## 版本0.0.0
 
 1. 实现音频播放，音频转换，主题切换 3 个主要功能。

@@ -5,10 +5,21 @@
    height: 100%;
  }
 
-
-
  body {
    margin: 0;
    padding: 0;
    /* overflow: hidden; */
+ }
+
+ @keyframes imgAnimation {
+   0% {
+     transform: scale(1);
+     opacity: 1;
+   }
+
+   100% {
+     transform: scale(1.6);
+     opacity: 0;
+
+   }
  }
