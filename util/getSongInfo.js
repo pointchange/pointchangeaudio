@@ -89,7 +89,7 @@ async function getMusicInfo(audioArray) {
             sampleRate: hasOwnPropertyDouble(metadata, 'format', 'sampleRate'),
             title: hasOwnPropertyDouble(metadata, 'common', 'title'),
             artist: hasOwnPropertyDouble(metadata, 'common', 'artist'),
-            picture: hasOwnPropertyDouble(metadata, 'common', 'picture'),
+            picture: hasOwnPropertyDouble(metadata, 'common', 'picture') ? true : false,
             album: hasOwnPropertyDouble(metadata, 'common', 'album'),
             //每秒编码音频文件的比特数
             bitrate: hasOwnPropertyDouble(metadata, 'format', 'bitrate'),

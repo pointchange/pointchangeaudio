@@ -76,19 +76,20 @@ function scrollToCurrentSong(){
           <el-descriptions-item label="歌名">
             {{ props.row.title?props.row.title:'未知' }}
           </el-descriptions-item>
-          <el-descriptions-item label="专辑">
-            {{ props.row.album?props.row.album:'未知' }}
+          <el-descriptions-item label="是否无损">
+            {{ props.row.lossless?'是':'否' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="是否有封面/插图">
+            {{props.row.picture?'有':'未知'}}
           </el-descriptions-item>
           <el-descriptions-item label="作者">
             {{ props.row.artist?props.row.artist:'未知' }}
           </el-descriptions-item>
-          <el-descriptions-item label="是否无损">
-            {{ props.row.lossless?'是':'否' }}
-          </el-descriptions-item>
           <el-descriptions-item label="持续时间（秒）">{{ props.row.duration }}</el-descriptions-item>
           <el-descriptions-item label="文件大小（字节）">{{props.row.songSize}}</el-descriptions-item>
-          <el-descriptions-item label="封面/插图">
-            {{props.row.picture?props.row.picture:'未知'}}
+
+          <el-descriptions-item label="专辑">
+            {{ props.row.album?props.row.album:'未知' }}
           </el-descriptions-item>
           <el-descriptions-item label="音频编码格式">
             {{props.row.container?props.row.container:'未知'}}

@@ -55,7 +55,7 @@ import { useFormat } from '@/store/format';
     }
     async function selectImg(){
         let img=new Image();
-        img.src = `local-img://456`;
+        img.src = `local-img://background`;
         img.addEventListener('error',function errorHandler(){
             ElMessage({
                 message: '取消了',

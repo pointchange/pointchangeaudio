@@ -1,5 +1,5 @@
 import { BrowserWindow, app, protocol, ipcMain, dialog, Menu, Tray, shell } from 'electron'
-import bool from 'electron-squirrel-startup';
+// import bool from 'electron-squirrel-startup';
 import path, { basename, join } from 'node:path';
 import { createReadStream } from 'original-fs';
 import { stat, readdir, unlink } from 'node:fs/promises';
@@ -9,9 +9,13 @@ import { fileURLToPath } from 'node:url'
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg';
 import ffmpeg from 'fluent-ffmpeg';
 import { path as ffprobePath } from '@ffprobe-installer/ffprobe';
+import { parseFile } from 'music-metadata';
 import { filterNotSongType } from './util/fiterSong.js';
 import { getMusicInfo } from './util/getSongInfo.js';
-if (bool) app.quit();
+
+
+
+// if (bool) app.quit();
 
 // const { BrowserWindow, app, protocol, ipcMain, dialog, Menu, Tray, shell } = require('electron')
 // const { basename, join } = require('node:path');
@@ -106,8 +110,11 @@ function createWindow() {
 
 Menu.setApplicationMenu(null);
 let tray = null;
+
+
 app.whenReady().then(() => {
     createWindow();
+
     protocol.handle('local-audio', async (request) => {
         let rightPath = request.url.replace(/local-audio:\/\/(\w)/, '$1' + ':');
         const info = await stat(decodeURI(rightPath)).catch(e => {
@@ -136,18 +143,46 @@ app.whenReady().then(() => {
     })
     protocol.handle('local-img', async (request) => {
         // let rightPath = request.url.replace(/local-img:\/\/(\w)/, '$1' + ':');
-        const { canceled, filePaths } = await dialog.showOpenDialog(win, {
-            title: '选择图片',
-            properties: ['openFile', 'showHiddenFiles']
-        });
-        if (canceled) return new Response();;
-        const rs = createReadStream(filePaths[0])
-        const response = new Response(rs);
-        return response;
-    })
+        if (request.url.includes('background')) {
+            const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+                title: '选择图片',
+                properties: ['openFile', 'showHiddenFiles']
+            });
+            if (canceled) return new Response();;
+            const rs = createReadStream(filePaths[0])
+            const response = new Response(rs);
+            return response;
+        }
+        if (request.url.includes('picture')) {
+            // request.url.replace(/picture\/\/(\w)/, '$1' + ':');
+            let str = request.url.split('picture')[1];
+            let arr = str.split('/');
+            let str2 = arr.join(':/');
+            // console.log(str2)
+            // return;
+            // let path = request.url.split('picture')[1];
+            const metadata = await parseFile(decodeURI(str2));
+            const { picture } = metadata.common;
+            // console.log(picture);
+            // return;
+            /*
+            [
+                {
+                    format: 'image/jpeg',
+                    type: 'Media (e.g. label side of CD)',
+                    description: '',
+                    data: <Buffer ff d8 ff e0 00 10 4a 46 49 46 00 01 01 01 00 48 00 48 00 00 ff db 00 43 00 02 01 01 01 01 01 02 01 01 01 02 02 02 02 02 04 03 02 02 02 02 05 04 04 03 ... 221375 more bytes>
+                }
+            ]
+            */
 
-    win.focus();
+            // let img = `data:${picture[0].format};base64,${picture[0].data.toString('base64')}`;
+
+            return new Response(picture[0].data);
+        }
+    })
     ipcMain.handle('on-open-directory', async (e) => {
+        win.focus();
         const { canceled, filePaths } = await dialog.showOpenDialog(win, {
             title: '选择文件夹',
             properties: ['openDirectory', 'multiSelections', 'showHiddenFiles']
@@ -301,6 +336,7 @@ app.whenReady().then(() => {
     const contextMenu = Menu.buildFromTemplate(menuList)
 
     tray.setContextMenu(contextMenu)
+
 });
 
 ipcMain.handle('on-close-win', (e) => {

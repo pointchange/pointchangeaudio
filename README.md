@@ -4,9 +4,9 @@
 
 ## 下载
 
-1. [阿里云盘](https://www.alipan.com/s/6eB9FvSM2VX)
+1. [阿里云盘](https://www.alipan.com/s/8EAChYJAx5C)
 
-2. [夸克网盘](https://pan.quark.cn/s/c926b1c0441d)
+2. [夸克网盘](https://pan.quark.cn/s/c718018ca609)
 
 ## 项目介绍
 
@@ -45,7 +45,7 @@ list:[
 | bitrate | 每秒编码音频文件的比特数 |
 | sampleRate | 采样率，单位为每秒采样数（S/s）|
 | lossless | 是否无损 |
-| picture | 封面/插图 |
+| picture | 是否有封面/插图 |
 | isActive | 是否激活 |
 
 ## 项目依赖
@@ -58,6 +58,12 @@ list:[
 | [pinia](https://pinia.vuejs.org/zh/) | 持久化数据和状态管理 |
 | [ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg) | 处理和操纵音频 |
 | [music-metadata](https://github.com/Borewit/music-metadata) | 读取音频元信息 |
+
+## 版本0.0.2
+
+1. 重要修复音频封面，让其正常显示。
+
+2. 版本0.0.0和版本0.0.1禁止使用，会卡顿。
 
 ## 版本0.0.1
 
@@ -276,7 +282,7 @@ list:[
   
     - 保存在 localStorage 中，可每个域只能有 5MB 大小。
 
-    > 本项目选取localStorage，主要是用于测试。
+    > 本项目选取localStorage，主要是用于测试。目前 localStorage 不能存储buffer 数据，否则会造成页面卡顿。
 
 5. element plus 对于vue支持，节省不少代码，简洁而优雅。但在主题颜色选择中有 **el-color-picker** 颜色选择器带来新的问题：```Added non-passive event listener to a scroll-blocking 'touchstart' event. Consider marking event handler as 'passive' to make the page more responsive.```就是滚动性能提升的建议。
    - 要么事件+```passive: true```
