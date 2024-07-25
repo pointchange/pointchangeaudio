@@ -4,8 +4,9 @@ export const usePosition = defineStore('usePosition', {
         clientHeight: 0,
         offsetTop: 0,
         position: [360, 145],
+        size: [1200, 750]
     }),
     persist: {
-        paths: ['position']
+        paths: ['position', 'size']
     }
 })

@@ -22,9 +22,15 @@ const resizeObserver = new ResizeObserver(entries => {
 onBeforeMount(()=>{
   let x=storePos.position[0];
   let y=storePos.position[1];
-  electron.getPositionXY(x,y)
+  electron.getPositionXY(x,y);
+  let w=storePos.size[0];
+  let h=storePos.size[1];
+  electron.onGetWinSize(w,h);
 })
 onMounted(()=>{
+  electron.onSetWinSize((e,size)=>{
+    storePos.size=size;
+  })
   electron.onSendPositionXY((e,position)=>{
     storePos.position=position;
   });
@@ -32,17 +38,29 @@ onMounted(()=>{
   resizeObserver.observe(document.body);
   electron.onSaveCurrentAudio((e,bool)=>{
     if(!bool) return;
+    const {
+      currentSong,
+      duration,
+      currentTime,
+      c,
+      d,
+      path,
+      pic
+    }=store.audioInfo;
     store.save={
-      currentSong:store.audioInfo.currentSong,
-      duration:store.audioInfo.duration,
-      currentTime:store.audioInfo.currentTime,
-      c:store.audioInfo.c,
-      d:store.audioInfo.d,
+      currentSong,
+      duration,
+      currentTime,
+      c,
+      d,
       // progressPresent:store.audioInfo.progressPresent,
-      title:store.audioInfo.title,
-      path:store.audioInfo.path,
+      // title:store.audioInfo.title,
+      path,
+      pic
     }
   });
+  
+  store.audioInfo.pic=store.save.pic;
   
   if(store.songs.length!==0)return;
   ElMessage({
@@ -104,7 +122,7 @@ function minimizableHandler(){
             </div>
           </template>
           <template #content>
-            <span class="text-mini"> {{store.audioInfo.title}} </span>
+            <span class="text-mini"> {{store.audioInfo.currentSong}} </span>
           </template>
           <template #extra>
             <div class="header-right">

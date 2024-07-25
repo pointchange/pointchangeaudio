@@ -90,6 +90,9 @@ function createWindow() {
     });
     // win.loadURL('http://localhost:5173/');
     win.loadFile(join(__dirnameNew, './dist/index.html'));
+    ipcMain.handle('on-get-win-size-wh', (e, w, h) => {
+        win.setSize(w, h)
+    })
     ipcMain.handle('on-get-position', (e, x, y) => {
         win.setPosition(x, y)
     })
@@ -101,6 +104,21 @@ function createWindow() {
     });
     win.on('close', e => {
         win.webContents.send('on-sava-current-audio', true)
+    });
+    win.on('resize', event => {
+        //w 930 h 600
+        let arr = win.getSize();
+        if (arr[0] < 930 || arr[1] < 600) {
+            win.setSize(930, 600)
+            win.resizable = false;
+        } else {
+            win.resizable = true;
+        }
+    });
+    win.on('resized', event => {
+        let arr = win.getSize();
+        win.resizable = true;
+        win.webContents.send('on-set-win-size-wh', arr);
     });
     win.on('moved', () => {
         win.webContents.send('on-send-position-xy', win.getPosition());

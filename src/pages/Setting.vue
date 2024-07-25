@@ -138,7 +138,9 @@ import { useFormat } from '@/store/format';
         selectColor.value='#409EFF';
 
         storeSongs.pause();
+        storeSongs.audio.removeEventListener('timeupdate', storeSongs.timeupdateHandler);
         storeSongs.songs=[];
+        storeSongs.save={};
         storeSongs.notPlaySongs=[];
         storeSongs.audioInfo={};
         storeSongs.visualClose={};

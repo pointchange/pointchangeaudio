@@ -59,6 +59,14 @@ list:[
 | [ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg) | 处理和操纵音频 |
 | [music-metadata](https://github.com/Borewit/music-metadata) | 读取音频元信息 |
 
+## 版本0.0.3
+
+1. 修复播放顺序持续保存
+
+2. 优化事件造成的内存开销，" 一键重置 "更彻底。
+
+3. 新增调整窗口大小的功能，实现响应式界面
+
 ## 版本0.0.2
 
 1. 重要修复音频封面，让其正常显示。

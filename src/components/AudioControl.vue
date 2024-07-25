@@ -15,6 +15,30 @@ const {nextSong,preSong,play,pause,changeVolume,addDirectory,countTime,changePro
 const volumeValue = ref(100);
 let progressValue=ref(0);
 const isEmpty=computed(()=>store.songs.length);
+const classStr=ref('loop-all');
+function changePlayOrderHandler(){
+  switch (store.playOrder) {
+    case 0:
+        classStr.value='loop-all'
+      break;
+    case 1:
+        classStr.value='random'
+      break;  
+    case 2:
+        classStr.value='loop-one'
+      break;
+    default:
+        store.playOrder=0;
+        classStr.value='loop-all'
+      break;
+  }
+}
+function changePlayOrder(){
+  store.playOrder++;
+  changePlayOrderHandler();
+}
+const isSaveEmpty=computed(()=>JSON.stringify(store.save)==='{}')
+const isDisabled=computed(()=>!isEmpty.value||isSaveEmpty.value);
 onMounted(()=>{
     electron.mainControlPlay((e, bool) => {
       if (bool) {
@@ -29,21 +53,23 @@ onMounted(()=>{
       }else{
         store.nextSong(store.audioInfo.path)
       }
-    })
-    if(!isEmpty){
+    });
+    changePlayOrderHandler();
+    if(!isEmpty.value){
       store.audioInfo={};
       store.save={};
     }
-    if(!store.save)return;
+    if(isSaveEmpty.value)return;
+    const {currentSong,duration,currentTime,c,d,path}=store.save;
     store.audioInfo={
-      currentSong:store.save.currentSong,
-      duration:store.save.duration,
-      currentTime:store.save.currentTime,
-      c:store.save.c,
-      d:store.save.d,
+      currentSong,
+      duration,
+      currentTime,
+      c,
+      d,
       // progressPresent:store.save.progressPresent,
-      title:store.save.title,
-      path:store.save.path,
+      // title:store.save.title,
+      path,
     }
 });
 
@@ -72,25 +98,7 @@ function isPlayHandler(){
     play();
   }
 }
-const classStr=ref('loop-all');
-function changePlayOrder(){
-  store.playOrder++;
-  switch (store.playOrder) {
-    case 0:
-        classStr.value='loop-all'
-      break;
-    case 1:
-        classStr.value='random'
-      break;  
-    case 2:
-        classStr.value='loop-one'
-      break;
-    default:
-        store.playOrder=0;
-        classStr.value='loop-all'
-      break;
-  }
-}
+
 
 
 </script>
@@ -110,20 +118,20 @@ function changePlayOrder(){
             <!-- <el-image style="width: 80px; height: 80px" src="" fit="fill" /> -->
           </template>
           <template #content>
-            <el-button :disabled="!isEmpty" class="el-button-icon" circle size="large" type="" text="" plain :icon="ArrowLeft" @click="()=>preSong(store.audioInfo.path)"></el-button>
-            <el-button :disabled="!isEmpty" class="el-button-icon" circle size="large" type="" text="" plain :icon="store.isPlaying?VideoPause:VideoPlay"
+            <el-button :disabled="isDisabled" class="el-button-icon" circle size="large" type="" text="" plain :icon="ArrowLeft" @click="()=>preSong(store.audioInfo.path)"></el-button>
+            <el-button :disabled="isDisabled" class="el-button-icon" circle size="large" type="" text="" plain :icon="store.isPlaying?VideoPause:VideoPlay"
             @click="isPlayHandler"></el-button>
-            <!-- <el-button :disabled="!isEmpty" class="el-button-icon" circle size="large" type="" text="" plain :icon="VideoPause"
+            <!-- <el-button :disabled="isDisabled" class="el-button-icon" circle size="large" type="" text="" plain :icon="VideoPause"
             @click="pause"></el-button> -->
-            <el-button :disabled="!isEmpty" class="el-button-icon" circle size="large" type="" text="" plain :icon="ArrowRight"
+            <el-button :disabled="isDisabled" class="el-button-icon" circle size="large" type="" text="" plain :icon="ArrowRight"
             @click="()=>nextSong(store.audioInfo.path)"></el-button>
             <el-popover placement="right" trigger="click">
               <template #reference>
-                <el-button :disabled="!isEmpty" class="el-button-icon" circle size="large" type="" text="" plain :icon="Microphone"></el-button>
+                <el-button :disabled="isDisabled" class="el-button-icon" circle size="large" type="" text="" plain :icon="Microphone"></el-button>
               </template>
               <el-slider v-model="volumeValue" @input="()=>changeVolume(volumeValue)" />
             </el-popover>
-            <el-button :disabled="!isEmpty" class="el-button-icon" type="" text="" size="large" circle @click="changePlayOrder">
+            <el-button :disabled="isDisabled" class="el-button-icon" type="" text="" size="large" circle @click="changePlayOrder">
               <template #icon>
                 <svg v-show="classStr==='loop-one'" t="1721291671314" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1946" width="16" height="16"><path d="M361.5 727.8c-119.1 0-215.9-96.9-215.9-215.9 0-119.1 96.9-215.9 215.9-215.9 2.3 0 4.6-0.2 6.8-0.6v58.3c0 12.3 14 19.4 23.9 12.1l132.6-97.6c8.1-6 8.1-18.2 0-24.2l-132.6-97.6c-9.9-7.3-23.9-0.2-23.9 12.1v58.1c-2.2-0.4-4.5-0.6-6.8-0.6-39.8 0-78.5 7.9-115 23.4-35.2 15-66.8 36.3-94 63.5s-48.6 58.8-63.5 94c-15.5 36.5-23.4 75.2-23.4 115s7.9 78.5 23.4 115c15 35.2 36.3 66.8 63.5 94s58.8 48.6 94 63.5c36.5 15.5 75.2 23.4 115 23.4 22.1 0 40-17.9 40-40s-17.9-40-40-40z m576.7-330.9c-15-35.2-36.3-66.8-63.5-94s-58.8-48.6-94-63.5c-36.5-15.5-75.2-23.4-115-23.4-22.1 0-40 17.9-40 40s17.9 40 40 40c119.1 0 215.9 96.9 215.9 215.9 0 119.1-96.9 215.9-215.9 215.9-4.1 0-8.1 0.6-11.8 1.8v-60.8c0-12.3-14-19.4-23.9-12.1l-132.6 97.6c-8.1 6-8.1 18.2 0 24.2L629.9 876c9.9 7.3 23.9 0.2 23.9-12.1V806c3.7 1.2 7.7 1.8 11.8 1.8 39.8 0 78.5-7.9 115-23.4 35.2-15 66.8-36.3 94-63.5s48.6-58.8 63.5-94c15.5-36.5 23.4-75.2 23.4-115s-7.8-78.5-23.3-115z" p-id="1947"></path><path d="M512.8 660.6c22.1-0.1 39.9-18.1 39.8-40.2l-1.2-214.1c-0.1-22-18-39.8-40-39.8h-0.2c-22.1 0.1-39.9 18.1-39.8 40.2l1.2 214.1c0.1 22 18 39.8 40 39.8h0.2z" p-id="1948"></path></svg>
 

@@ -28,4 +28,6 @@ contextBridge.exposeInMainWorld('electron', {
     onSendPositionXY: callback => ipcRenderer.on('on-send-position-xy', callback),
     getPositionXY: (x, y) => ipcRenderer.invoke('on-get-position', x, y),
     onSwitchSong: callback => ipcRenderer.on('on-switch-song', callback),
+    onSetWinSize: callback => ipcRenderer.on('on-set-win-size-wh', callback),
+    onGetWinSize: (w, h) => ipcRenderer.invoke('on-get-win-size-wh', w, h),
 })

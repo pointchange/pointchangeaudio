@@ -130,7 +130,7 @@ export const useSongList = defineStore('song-list', {
             //匹配歌曲名字
             this.audioInfo.title = this.getName(path, '', true);
 
-            this.audio.addEventListener("loadeddata", (event) => {
+            const loadeddataHandler = () => {
                 // if ('onerror' in this.audio) {
                 //     this.audio.removeEventListener('error', errorDailog);
                 // }
@@ -140,6 +140,21 @@ export const useSongList = defineStore('song-list', {
                 this.play();
                 this.audioInfo.duration = this.countTime(this.audio.duration);
                 this.audioInfo.currentTime = this.countTime(this.audio.currentTime);
+                if (JSON.stringify(this.save) === '{}') {
+                    this.save = {
+                        c: this.audio.currentTime,
+                        d: this.audio.duration,
+                        path,
+                        currentSong: this.audioInfo.currentSong,
+                        duration: this.audioInfo.duration,
+                        currentTime: this.audioInfo.currentTime,
+                    }
+                }
+            }
+
+            this.audio.addEventListener("loadeddata", () => {
+                loadeddataHandler();
+                this.audio.removeEventListener('loadeddata', loadeddataHandler);
             });
             this.audio.addEventListener('timeupdate', this.timeupdateHandler);
             this.audio.addEventListener('ended', () => {
@@ -239,6 +254,6 @@ export const useSongList = defineStore('song-list', {
         },
     },
     persist: {
-        paths: ['songs', 'orderNameList', 'notPlaySongs', 'save']
+        paths: ['songs', 'orderNameList', 'notPlaySongs', 'save', 'playOrder']
     }
 })
