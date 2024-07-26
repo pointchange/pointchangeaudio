@@ -160,4 +160,7 @@ function scrollToCurrentSong(){
       align-items: center;
       flex-wrap: nowrap
     }
+    .el-descriptions{
+      user-select: text;
+    }
 </style>

@@ -99,9 +99,12 @@ export const useSongList = defineStore('song-list', {
         async playCurrentMusic(path) {
             this.audioInfo.path = path;
             this.audioInfo.currentSong = this.getName(path, '', true);
-            const pic = this.songs.filter(item => item.path === path)[0].picture
-            this.audioInfo.pic = pic;
+            const filterCurrentSongObj = this.songs.filter(item => item.path === path)[0];
+            this.audioInfo.pic = filterCurrentSongObj.picture;
+            //匹配歌曲名字
+            this.audioInfo.title = this.getName(path, filterCurrentSongObj.title);
             //找路径
+            this.audioInfo.artist = filterCurrentSongObj.artist ? filterCurrentSongObj.artist : this.getName(path, '', true).split('-')[0];
             this.audio.src = 'local-audio://' + path;
             //播放错误处理
             let that = this;
@@ -127,8 +130,7 @@ export const useSongList = defineStore('song-list', {
                     });
                 e.target.removeEventListener('error', audioError);
             })
-            //匹配歌曲名字
-            this.audioInfo.title = this.getName(path, '', true);
+
 
             const loadeddataHandler = () => {
                 // if ('onerror' in this.audio) {

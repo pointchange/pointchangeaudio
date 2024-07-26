@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from "vue-router";
 import MusicList from "@/pages/MusicList.vue";
 import TransformAudio from "@/pages/TransformAudio.vue";
 import Setting from "@/pages/Setting.vue";
+import Playing from "@/pages/Playing.vue";
 const routes = [
     {
         path: '/',
@@ -14,6 +15,10 @@ const routes = [
     {
         path: '/transformAudio',
         component: TransformAudio
+    },
+    {
+        path: '/playing',
+        component: Playing
     },
     {
         path: '/setting',

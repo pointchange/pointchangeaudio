@@ -1,6 +1,6 @@
 {
   "name": "pointchangeaudio",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "description": "pointchangeaudio(PCA)",
   "main": "main.js",

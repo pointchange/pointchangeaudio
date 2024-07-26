@@ -45,7 +45,9 @@ onMounted(()=>{
       c,
       d,
       path,
-      pic
+      pic,
+      title,
+      artist
     }=store.audioInfo;
     store.save={
       currentSong,
@@ -56,11 +58,15 @@ onMounted(()=>{
       // progressPresent:store.audioInfo.progressPresent,
       // title:store.audioInfo.title,
       path,
-      pic
+      pic,
+      title,
+      artist
     }
   });
   
   store.audioInfo.pic=store.save.pic;
+  store.audioInfo.title=store.save.title;
+  store.audioInfo.artist=store.save.artist;
   
   if(store.songs.length!==0)return;
   ElMessage({
@@ -112,7 +118,6 @@ function minimizableHandler(){
 }
 </script>
 <template>
-  
     <el-container >
       <el-header>
         <el-page-header class="header" title="PCA">
@@ -152,6 +157,12 @@ function minimizableHandler(){
                 <Refresh />
               </el-icon>
               <template #title>音频转换</template>
+            </el-menu-item>
+            <el-menu-item index="/playing">
+              <el-icon>
+                <Histogram />
+              </el-icon>
+              <template #title>正在播放</template>
             </el-menu-item>
             <el-menu-item index="/setting">
               <el-icon>

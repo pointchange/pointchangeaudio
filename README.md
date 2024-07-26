@@ -59,6 +59,10 @@ list:[
 | [ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg) | 处理和操纵音频 |
 | [music-metadata](https://github.com/Borewit/music-metadata) | 读取音频元信息 |
 
+## 版本0.0.4
+
+1. 新增 "正在播放" 页面。
+
 ## 版本0.0.3
 
 1. 修复播放顺序持续保存

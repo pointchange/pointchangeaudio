@@ -7,8 +7,12 @@ import {
   VideoPlay,
   Microphone,
 } from '@element-plus/icons-vue';
-import {  ref , onMounted,watch, computed} from 'vue';
+import {  ref , onMounted,watch, computed, watchEffect} from 'vue';
 import { useSongList } from '@/store/musicList';
+import Image from './Image.vue';
+import { useRouter } from 'vue-router';
+import getImageColor from '@/util/getImageColor';
+import { useTheme } from '@/store/theme';
 
 const store=useSongList();
 const {nextSong,preSong,play,pause,changeVolume,addDirectory,countTime,changeProgress}=store;
@@ -98,23 +102,42 @@ function isPlayHandler(){
     play();
   }
 }
+const route=useRouter();
+function openPlayingPage(){
+  route.push('/playing');
+}
+let rgb=ref('');
+const storeTheme=useTheme();
+watch(()=>store.audioInfo.path,async()=>{
+  if(!store.audioInfo.pic) return;
+  let img = document.createElement('img');
+  // let img = new Image();
+  img.src = `local-img://picture${store.audioInfo.path}`;
 
-
+  rgb.value = await new Promise((resolve,reject)=>{
+      img.addEventListener('load',function getColor(){
+          resolve(getImageColor(this));
+          this.removeEventListener('load',getColor);
+      });
+  });
+  storeTheme.controlColor=`rgba(${rgb.value},8)`;
+},{immediate:true});
 
 </script>
 <template>
   <!-- <el-affix target="#app" position="bottom" > -->
     <Teleport to="body">
-      <div class="control-container">
+      <div class="control-container" :style="{ backgroundImage: `linear-gradient( 109.6deg, rgba(255,255,255,.8) 11.2%, ${storeTheme.controlColor})`}">
         <el-page-header class="el-page-header-ele" title=" ">
           <template #icon>
             <!-- <el-image style="width: 80px; height: 80px" 
             :src="store.audioInfo.pic?`data:${store.audioInfo.pic[0].format};base64,${store.audioInfo.pic[0].data.toString('base64')}`:''" 
             fit="fill" /> -->
             <!-- 按需加载 播放时加载 -->
-           <el-image style="width: 80px; height: 80px" :src="store.audioInfo.pic?
+           <!-- <el-image style="width: 80px; height: 80px" :src="store.audioInfo.pic?
             `local-img://picture${store.audioInfo.path}`
-            :''" fit="fill" /> 
+            :''" fit="fill" />  -->
+            <Image class="image" @click="openPlayingPage"/>
             <!-- <el-image style="width: 80px; height: 80px" src="" fit="fill" /> -->
           </template>
           <template #content>
@@ -165,6 +188,10 @@ function isPlayHandler(){
 
 </template>
 <style scoped>
+.image{
+  width: 80px;
+  height: 80px;
+}
 .control-container{
   position: fixed;
   bottom: 0;
@@ -181,7 +208,7 @@ function isPlayHandler(){
 .progress-container{
   padding: 0 5rem;
   position: absolute;
-  bottom: 60px;
+  bottom: 62px;
   width: 100%;
   box-sizing: border-box;
 }

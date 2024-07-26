@@ -2,7 +2,8 @@ import { defineStore } from 'pinia';
 export const useTheme = defineStore('theme', {
     state: () => ({
         selectTheme: 'light',
-        selectColor: '#409EFF'
+        selectColor: '#409EFF',
+        controlColor: 'var(--el-color-primary-light-6)',
     }),
     actions: {
         init() {

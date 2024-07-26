@@ -5,7 +5,7 @@ import { useTheme } from '@/store/theme';
 import { storeToRefs } from 'pinia';
 import { useSongList } from '@/store/musicList';
 import { useFormat } from '@/store/format';
-
+import getImageColor from '@/util/getImageColor'
 //#409eff --el-color-primary  --el-slider-main-bg-color  --el-tag-text-color
 //#67c23a --el-color-success #f0f9eb --el-color-success-light-9 #b3e19d--el-color-success-light-5
 //#95d475 --el-color-success-light-3
@@ -63,51 +63,11 @@ import { useFormat } from '@/store/format';
             })
             this.removeEventListener('error',errorHandler)
         })
-
-        const canvas = document.createElement('canvas');
-        function getImageColor(canvas, img) {
-            canvas.width = img.width;
-            canvas.height = img.height;
-
-            const context = canvas.getContext("2d");
-
-            context.drawImage(img, 0, 0,canvas.width,canvas.height);
-
-            // 获取像素数据
-            const data = context.getImageData(0, 0, img.width, img.height).data;
-            let r=1,g=1,b=1;
-            // 取所有像素的平均值
-            for (var row = 0; row < img.height; row++) {
-                for (var col = 0; col < img.width; col++) {
-            // console.log(data[((img.width * row) + col) * 4])
-                    if(row==0){
-                        r += data[((img.width * row) + col)];
-                        g += data[((img.width * row) + col) + 1];
-                        b += data[((img.width * row) + col) + 2];
-                    }else{
-                        r += data[((img.width * row) + col) * 4];
-                        g += data[((img.width * row) + col) * 4 + 1];
-                        b += data[((img.width * row) + col) * 4 + 2];
-                    }
-                }
-            }
-            // 求取平均值
-            r /= (img.width * img.height);
-            g /= (img.width * img.height);
-            b /= (img.width * img.height);
-
-            // 将最终的值取整
-            r = Math.round(r);
-            g = Math.round(g);
-            b = Math.round(b);
-            // return "rgb(" + r + "," + g + "," + b + ")";
-            return `${r},${g},${b}`;
-        }
         let rgb='';
         
         rgb=await new Promise((resolve,reject)=>{
             img.addEventListener('load',function getColor(){
-                resolve(getImageColor(canvas,this));
+                resolve(getImageColor(this));
                 this.removeEventListener('load',getColor);
             });
         });
