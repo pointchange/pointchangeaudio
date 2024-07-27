@@ -130,7 +130,7 @@ function scrollToCurrentSong(){
       <template #default="scope">
         <el-space wrap>
           <el-tag size="small" type="info" effect="plain">{{ countTime(scope.row.duration) }}</el-tag>
-          <el-tag size="small" :type="scope.row.lossless?'warning':'success'">{{ scope.row.path.split('.')[1].toUpperCase() }}</el-tag>
+          <el-tag size="small" :type="scope.row.lossless?'warning':'success'">{{ scope.row.path.split('.')[scope.row.path.split('.').length-1].toUpperCase() }}</el-tag>
         </el-space>
       </template>
     </el-table-column>

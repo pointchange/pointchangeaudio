@@ -13,19 +13,30 @@ import { nextTick, ref, watch } from 'vue';
         await nextTick();
         const row= document.querySelector('.current-row');
         if(!row)return;
+        
+        row.classList.add('animate__animated','animate__pulse')
+
         let listTop = document.querySelector('.el-table__body').getBoundingClientRect().top;
         elTableRef.value.setScrollTop(row.getBoundingClientRect().top-listTop-(storePos.clientHeight-160-300-40)/2)
     })
 </script>
 <template>
-    <div class="playing">
-        <Image  class="el-image-class" />
-        <div class="song">
-            <el-space class="space" direction="vertical">
-                <div class="title">{{store.audioInfo.title}}</div>
-                <div class="name">{{store.audioInfo.artist}}</div>
-            </el-space>
-        </div>
+    <div style="position: relative;overflow: hidden;">
+        <Transition
+        name="playing"
+        enter-active-class="animate__animated animate__slideInRight"
+        leave-active-class="animate__animated animate__slideOutLeft playing-leave-active"
+        >
+            <div class="playing" :key="store.audioInfo.path">
+                <Image  class="el-image-class" />
+                <div class="song">
+                    <el-space class="space" direction="vertical">
+                        <div class="title">{{store.audioInfo.title}}</div>
+                        <div class="name">{{store.audioInfo.artist}}</div>
+                    </el-space>
+                </div>
+            </div>
+        </Transition>
     </div>
     <el-table ref="elTableRef" :data="store.songs" stripe style="width: 100%" highlight-current-row :max-height="storePos.clientHeight-160-300"
     @row-click="({path})=>playCurrentMusic(path)">
@@ -42,6 +53,9 @@ import { nextTick, ref, watch } from 'vue';
     </el-table>
 </template>
 <style scoped>
+    .playing-leave-active {
+        position: absolute;
+    }
     .playing{
         display: flex;
         align-items: flex-end;

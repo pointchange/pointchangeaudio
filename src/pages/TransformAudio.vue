@@ -126,7 +126,6 @@ const transformDoc=[
 ];
 </script>
 <template>
-  <!-- <div class="color">123</div> -->
   <el-tabs stretch v-model="activeName" class="demo-tabs">
     <el-tab-pane label="音频转换" name="transform">
       <el-card >
@@ -191,7 +190,6 @@ const transformDoc=[
         </el-descriptions>
     </el-tab-pane>
   </el-tabs>
-  
 </template>
 <style scoped>
   .row{

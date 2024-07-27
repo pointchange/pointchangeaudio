@@ -58,6 +58,13 @@ list:[
 | [pinia](https://pinia.vuejs.org/zh/) | 持久化数据和状态管理 |
 | [ffmpeg](https://github.com/fluent-ffmpeg/node-fluent-ffmpeg) | 处理和操纵音频 |
 | [music-metadata](https://github.com/Borewit/music-metadata) | 读取音频元信息 |
+| [animate.css](https://animate.style/) | 控制动画 |
+
+## 版本0.0.5
+
+1. 修复音频封面规则匹配，列表标签错乱规则。
+
+2. 增添 "正在播放" 页面切换动画。
 
 ## 版本0.0.4
 

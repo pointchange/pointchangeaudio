@@ -122,8 +122,8 @@ function minimizableHandler(){
       <el-header>
         <el-page-header class="header" title="PCA">
           <template #icon>
-            <div class="img-container">
-              <img class="img" src="./assets/favicon-16x16.png" alt="" @click="clickHandler">
+            <div class="img-container" @click="clickHandler">
+              <img class="img" src="./assets/favicon-16x16.png" alt="" >
             </div>
           </template>
           <template #content>
@@ -174,9 +174,9 @@ function minimizableHandler(){
         </el-aside>
         <el-main :style="{height: (storePos.clientHeight-160)+'px'}">
             <RouterView  v-slot="{ Component }">
-              <KeepAlive include="MusicList">
-                <component :is="Component"/>
-              </KeepAlive>
+                <KeepAlive include="MusicList">
+                  <component :is="Component"/>
+                </KeepAlive>
             </RouterView> 
             <!-- <RouterView/> -->
         </el-main>

@@ -175,8 +175,10 @@ app.whenReady().then(() => {
             // request.url.replace(/picture\/\/(\w)/, '$1' + ':');
             let str = request.url.split('picture')[1];
             let arr = str.split('/');
-            let str2 = arr.join(':/');
-            // console.log(str2)
+            // let str2 = arr.join(':/');
+            arr[0] = arr[0] + ':';
+            let str2 = arr.join('/');
+            // console.log(arr, str2)
             // return;
             // let path = request.url.split('picture')[1];
             const metadata = await parseFile(decodeURI(str2));
