@@ -60,6 +60,12 @@ list:[
 | [music-metadata](https://github.com/Borewit/music-metadata) | 读取音频元信息 |
 | [animate.css](https://animate.style/) | 控制动画 |
 
+## 版本0.0.6
+
+1. 优化音频后缀匹配规则
+
+2. 新增 "精确读取音频信息"，只解决部分duration为"00:00"。
+
 ## 版本0.0.5
 
 1. 修复音频封面规则匹配，列表标签错乱规则。

@@ -30,4 +30,5 @@ contextBridge.exposeInMainWorld('electron', {
     onSwitchSong: callback => ipcRenderer.on('on-switch-song', callback),
     onSetWinSize: callback => ipcRenderer.on('on-set-win-size-wh', callback),
     onGetWinSize: (w, h) => ipcRenderer.invoke('on-get-win-size-wh', w, h),
+    accurateGetAudioInfo: pathList => ipcRenderer.invoke('on-accurate-get-audio-info', pathList),
 })

@@ -57,6 +57,14 @@ function scrollToCurrentSong(){
   let listTop = document.querySelector('.el-table__body').getBoundingClientRect().top
   elTableRef.value.setScrollTop(-(listTop-row.getBoundingClientRect().top))
 }
+async function accurateGetAudioInfo(path){
+  const res=await electron.accurateGetAudioInfo([path]);
+  for (let index = 0; index < store.songs.length; index++) {
+    if(store.songs[index].path===path){
+      store.songs[index]={...store.songs[index],...res[0]}
+    }
+  }
+}
 </script>
 <template>
   <el-table ref="elTableRef" :data="find(search)"  highlight-current-row
@@ -97,8 +105,11 @@ function scrollToCurrentSong(){
           <el-descriptions-item label="采样率，单位为每秒采样数（S/s）">
             {{ props.row.sampleRate }}
           </el-descriptions-item>
-          <el-descriptions-item label="路径">
+          <el-descriptions-item label="路径" :span="3">
             <el-link type="success" @click="openFileHandler(props)">{{ props.row.path }}</el-link>
+          </el-descriptions-item>
+          <el-descriptions-item label="操作" >
+            <el-button type="warning" plain @click="accurateGetAudioInfo(props.row.path)">数据是否有错误？可精确获取数据</el-button>
           </el-descriptions-item>
         </el-descriptions>
       </template>

@@ -307,6 +307,10 @@ app.whenReady().then(() => {
         win.webContents.send('on-visual-close-info', currentSongInfo);
     });
 
+    ipcMain.handle('on-accurate-get-audio-info', async (e, pathList) => {
+        return await getMusicInfo(pathList, true)
+    });
+
     let timeId = null
     let isPlay = false;
 
