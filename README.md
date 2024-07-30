@@ -60,6 +60,14 @@ list:[
 | [music-metadata](https://github.com/Borewit/music-metadata) | 读取音频元信息 |
 | [animate.css](https://animate.style/) | 控制动画 |
 
+## 版本0.0.7
+
+1. 新增 "歌词" 功能。
+
+2. 修复扫描音频文件夹的子文件夹。优化读取音频信息。
+
+3. 新增 "音频调速" 功能。 
+
 ## 版本0.0.6
 
 1. 优化音频后缀匹配规则

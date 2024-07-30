@@ -33,12 +33,14 @@ function isNaNMetadata(value) {
         return value
     }
 }
-//audioArray 可用的数据数组
-async function getMusicInfo(audioArray, isAccurate = false) {
+//audioPathArray 路径数组
+async function getMusicInfo(songPathAndLrcObj, isAccurate = false) {
+    let audioPathArray = songPathAndLrcObj.songPathArr || [];
+    let lrcArray = songPathAndLrcObj.lrcArr || [];
     let songList = [];
     if (isAccurate) {
-        for (let index = 0; index < audioArray.length; index++) {
-            const path = audioArray[index];
+        for (let index = 0; index < audioPathArray.length; index++) {
+            const path = audioPathArray[index];
             const metadata = await new Promise((resolve, reject) => {
                 const rs = createReadStream(path);
                 ffmpeg(rs).ffprobe(function (err, metadata) {
@@ -55,11 +57,12 @@ async function getMusicInfo(audioArray, isAccurate = false) {
                 artist: isNaNMetadata(metadata.format.artist),
                 album: isNaNMetadata(metadata.format.album),
                 bitrate: isNaNMetadata(metadata.format.bit_rate),
+
             });
         }
     } else {
-        for (let index = 0; index < audioArray.length; index++) {
-            const path = audioArray[index];
+        for (let index = 0; index < audioPathArray.length; index++) {
+            const path = audioPathArray[index];
             const metadata = await parseFile(path);
             const info = await stat(path);
             songList.push({
@@ -76,6 +79,7 @@ async function getMusicInfo(audioArray, isAccurate = false) {
                 album: hasOwnPropertyDouble(metadata, 'common', 'album'),
                 //每秒编码音频文件的比特数
                 bitrate: hasOwnPropertyDouble(metadata, 'format', 'bitrate'),
+                lrc: false,
 
                 // path,
                 // songSize: info.size,
@@ -91,6 +95,17 @@ async function getMusicInfo(audioArray, isAccurate = false) {
                 // //每秒编码音频文件的比特数
                 // bitrate: metadata.format.bitrate,
             })
+        }
+    }
+
+    for (let index = 0; index < lrcArray.length; index++) {
+        const lrc = lrcArray[index];
+        for (let index = 0; index < songList.length; index++) {
+            const songArr = (songList[index].path.replace(/[\s\S.]+\\/, '').replace(/\.\w+/g, '')).split('-');
+            const lrcArr = (lrc.replace(/[\s\S.]+\\/, '').replace(/\.\w+/g, '')).split('-');
+            if (songArr[0].trim() === lrcArr[0].trim() && songArr[1].trim() === lrcArr[1].trim()) {
+                songList[index] = { ...songList[index], ...{ lrc } }
+            }
         }
     }
     return songList;

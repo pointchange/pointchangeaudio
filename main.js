@@ -72,6 +72,16 @@ protocol.registerSchemesAsPrivileged([
             stream: true,
             bypassCSP: true,
         }
+    },
+    {
+        scheme: 'local-lrc',
+        privileges: {
+            standard: true,
+            secure: true,
+            supportFetchAPI: true,
+            stream: true,
+            bypassCSP: true,
+        }
     }
 ])
 let win;
@@ -126,9 +136,165 @@ function createWindow() {
     // win.webContents.openDevTools();
 }
 
+ipcMain.handle('on-get-lrc-path', async (e, lrcPath) => {
+    const res = await new Promise((resolve, reject) => {
+        const rs = createReadStream(decodeURI(lrcPath), { encoding: 'utf-8' });
+        rs.on('data', data => {
+            resolve(data);
+        });
+        rs.on('error', error => {
+            reject(error);
+        })
+    })
+    // const str = res.replace(/\[[^]+\]\n/, '');
+    // const str = '[00:00.00]' + res.split('[00:00.00]')[1];
+    let strArr = res.split('\n') || [];
+    let lrcArr = [];
+    strArr.forEach(str => {
+        let time = 0;
+        let text = '';
+        str.replace(/\[(\d{2}):(\d{2}).(\d{2})\]([^]+)/g, (str, $1, $2, $3, $4) => {
+            time = parseInt($1, 10) * 60 + parseFloat(`${$2}.${$3}`);
+            text = $4;
+        });
+        lrcArr.push({
+            time,
+            text
+        })
+    });
+    lrcArr = lrcArr.filter(item => item.text !== '');
+    return lrcArr;
+})
+
+ipcMain.handle('on-open-directory', async (e) => {
+    win.focus();
+    const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+        title: '选择文件夹',
+        properties: ['openDirectory', 'multiSelections', 'showHiddenFiles']
+    })
+    if (canceled) return;
+    const getAudioFileArray = [];
+    async function getAudioFile(filePath) {
+        const dirAndFileArray = await readdir(filePath);
+        let getAudioFileArray = [];
+        for (let j = 0; j < dirAndFileArray.length; j++) {
+            const path = join(filePath, dirAndFileArray[j])
+            const st = await stat(path);
+            if (st.isDirectory()) {
+                getAudioFileArray.push(...await getAudioFile(path))
+            } else {
+                getAudioFileArray.push(path)
+            }
+        }
+        return getAudioFileArray;
+    }
+    for (let index = 0; index < filePaths.length; index++) {
+        const filePath = filePaths[index];
+        getAudioFileArray.push(...await getAudioFile(filePath))
+    }
+    let songPathAndLrcObj = await filterNotSongType(getAudioFileArray);
+    return await getMusicInfo(songPathAndLrcObj)
+})
+let isVisual = false;
+
+ipcMain.handle('on-open-file-place', async (e, path) => {
+    shell.showItemInFolder(path);
+});
+ipcMain.handle('on-drag-enter-song', async (e, filePathList) => {
+    let songList = await getMusicInfo({ filePathList })
+    return songList;
+})
+ipcMain.handle('on-transform-format', async (e, path, name, format) => {
+    const postfix = name.split('.')[1];
+    const pathNoPostfix = path.replace(postfix, '');
+    const newPath = pathNoPostfix + format;
+    await new Promise((resolve, reject) => {
+        ffmpeg(path).on('end', function () {
+            resolve()
+        }).on('progress', async function (progress) {
+            win.webContents.send('on-update-progress', progress.percent);
+        }).on('error', e => {
+            reject(e);
+        }).save(newPath);
+    });
+    return { newPath, name: basename(newPath) };
+})
+ipcMain.handle('on-delet-done', async (e, path) => {
+    return await unlink(path);
+});
+ipcMain.handle('on-transform-open-directory', async (e) => {
+    const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+        title: '选择文件夹',
+        properties: ['openDirectory', 'multiSelections', 'showHiddenFiles']
+    })
+    if (canceled) return;
+    const fileList = await readdir(filePaths[0]);
+    const availableSongTypeList = await filterNotSongType(fileList);
+    let res = [];
+    availableSongTypeList.forEach(item => {
+        res.push({
+            name: item,
+            path: join(filePaths[0], item),
+            isSelect: true,
+            progress: 0,
+        })
+    });
+    return res;
+});
+ipcMain.handle('on-get-audio-infor', async (e, pathList) => {
+    return await getMusicInfo({ pathList })
+});
+
+let winChild;
+ipcMain.handle('on-create-win', (e, arr, obj) => {
+    win.hide();
+    isVisual = true;
+    winChild = new BrowserWindow({
+        width: 350,
+        height: 250,
+        show: false,
+        transparent: true,
+        resizable: false,
+        frame: false,
+        webPreferences: {
+            devTools: false,
+            nodeIntegration: true,
+            // preload: join(__dirnameNew, './preload/vue_child.mjs'),
+            preload: join(__dirnameNew, './preload/vue_child.mjs'),
+        }
+    });
+    // winChild.loadURL('http://localhost:5174/');
+    winChild.loadFile(join(__dirnameNew, './vue_child/dist/index.html'));
+    winChild.on('ready-to-show', () => {
+        winChild.show();
+        winChild.setAlwaysOnTop(true);
+        winChild.webContents.send('on-msg', arr, obj);
+        winChild.setSkipTaskbar(true);
+    })
+    // process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
+    // winChild.webContents.openDevTools();
+
+    winChild.on('moved', () => {
+        winChild.webContents.send('on-send-position', winChild.getPosition());
+    })
+});
+ipcMain.handle('on-init-open', (e, position) => {
+    winChild.setPosition(position[0], position[1]);
+})
+
+ipcMain.handle('on-visual-close', (e, currentSongInfo) => {
+    isVisual = false;
+    win.show();
+    winChild.close();
+    win.webContents.send('on-visual-close-info', currentSongInfo);
+});
+
+ipcMain.handle('on-accurate-get-audio-info', async (e, pathList) => {
+    return await getMusicInfo({ pathList }, true)
+});
+
 Menu.setApplicationMenu(null);
 let tray = null;
-
 
 app.whenReady().then(() => {
     createWindow();
@@ -201,115 +367,36 @@ app.whenReady().then(() => {
             return new Response(picture[0].data);
         }
     })
-    ipcMain.handle('on-open-directory', async (e) => {
-        win.focus();
-        const { canceled, filePaths } = await dialog.showOpenDialog(win, {
-            title: '选择文件夹',
-            properties: ['openDirectory', 'multiSelections', 'showHiddenFiles']
+    protocol.handle('local-lrc', async (request) => {
+        let rightPath = request.url.replace(/local-lrc:\/\/(\w)/, '$1' + ':');
+        const res = await new Promise((resolve, reject) => {
+            const rs = createReadStream(decodeURI(rightPath), { encoding: 'utf-8' });
+            rs.on('data', data => {
+                resolve(data);
+            });
+            rs.on('error', error => {
+                reject(error);
+            })
         })
-        if (canceled) return;
-        const dirAndFileArray = await readdir(filePaths[0]);
-        let audioArray = await filterNotSongType(dirAndFileArray);
-        audioArray = audioArray.map(item => join(filePaths[0], item));
-        return await getMusicInfo(audioArray)
-    })
-    let isVisual = false;
-
-    ipcMain.handle('on-open-file-place', async (e, path) => {
-        shell.showItemInFolder(path);
-    });
-    ipcMain.handle('on-drag-enter-song', async (e, filePathList) => {
-        let songList = await getMusicInfo(filePathList)
-        return songList;
-    })
-    ipcMain.handle('on-transform-format', async (e, path, name, format) => {
-        const postfix = name.split('.')[1];
-        const pathNoPostfix = path.replace(postfix, '');
-        const newPath = pathNoPostfix + format;
-        await new Promise((resolve, reject) => {
-            ffmpeg(path).on('end', function () {
-                resolve()
-            }).on('progress', async function (progress) {
-                win.webContents.send('on-update-progress', progress.percent);
-            }).on('error', e => {
-                reject(e);
-            }).save(newPath);
-        });
-        return { newPath, name: basename(newPath) };
-    })
-    ipcMain.handle('on-delet-done', async (e, path) => {
-        return await unlink(path);
-    });
-    ipcMain.handle('on-transform-open-directory', async (e) => {
-        const { canceled, filePaths } = await dialog.showOpenDialog(win, {
-            title: '选择文件夹',
-            properties: ['openDirectory', 'multiSelections', 'showHiddenFiles']
-        })
-        if (canceled) return;
-        const fileList = await readdir(filePaths[0]);
-        const availableSongTypeList = await filterNotSongType(fileList);
-        let res = [];
-        availableSongTypeList.forEach(item => {
-            res.push({
-                name: item,
-                path: join(filePaths[0], item),
-                isSelect: true,
-                progress: 0,
+        // const str = res.replace(/\[[^]+\]\n/, '');
+        // const str = '[00:00.00]' + res.split('[00:00.00]')[1];
+        let strArr = res.split('\n') || [];
+        let lrcArr = [];
+        strArr.forEach(str => {
+            let time = 0;
+            let text = '';
+            str.replace(/\[(\d{2}):(\d{2}).(\d{2})\]([^]+)/g, (str, $1, $2, $3, $4) => {
+                time = parseInt($1, 10) * 60 + parseFloat(`${$2}.${$3}`);
+                text = $4;
+            });
+            lrcArr.push({
+                time,
+                text
             })
         });
-        return res;
-    });
-    ipcMain.handle('on-get-audio-infor', async (e, pathList) => {
-        return await getMusicInfo(pathList)
-    });
-
-    let winChild;
-    ipcMain.handle('on-create-win', (e, arr, obj) => {
-        win.hide();
-        isVisual = true;
-        winChild = new BrowserWindow({
-            width: 350,
-            height: 250,
-            show: false,
-            transparent: true,
-            resizable: false,
-            frame: false,
-            webPreferences: {
-                devTools: false,
-                nodeIntegration: true,
-                // preload: join(__dirnameNew, './preload/vue_child.mjs'),
-                preload: join(__dirnameNew, './preload/vue_child.mjs'),
-            }
-        });
-        // winChild.loadURL('http://localhost:5174/');
-        winChild.loadFile(join(__dirnameNew, './vue_child/dist/index.html'));
-        winChild.on('ready-to-show', () => {
-            winChild.show();
-            winChild.setAlwaysOnTop(true);
-            winChild.webContents.send('on-msg', arr, obj);
-            winChild.setSkipTaskbar(true);
-        })
-        // process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
-        // winChild.webContents.openDevTools();
-
-        winChild.on('moved', () => {
-            winChild.webContents.send('on-send-position', winChild.getPosition());
-        })
-    });
-    ipcMain.handle('on-init-open', (e, position) => {
-        winChild.setPosition(position[0], position[1]);
+        lrcArr = lrcArr.filter(item => item.text !== '');
+        return new Response(JSON.stringify(lrcArr));
     })
-
-    ipcMain.handle('on-visual-close', (e, currentSongInfo) => {
-        isVisual = false;
-        win.show();
-        winChild.close();
-        win.webContents.send('on-visual-close-info', currentSongInfo);
-    });
-
-    ipcMain.handle('on-accurate-get-audio-info', async (e, pathList) => {
-        return await getMusicInfo(pathList, true)
-    });
 
     let timeId = null
     let isPlay = false;
