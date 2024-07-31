@@ -1,11 +1,12 @@
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { ElMessage} from 'element-plus'
 import { useTheme } from '@/store/theme';
 import { storeToRefs } from 'pinia';
 import { useSongList } from '@/store/musicList';
 import { useFormat } from '@/store/format';
-import getImageColor from '@/util/getImageColor'
+import getImageColor from '@/util/getImageColor';
+import FontOption from '@/components/FontOption.vue';
 //#409eff --el-color-primary  --el-slider-main-bg-color  --el-tag-text-color
 //#67c23a --el-color-success #f0f9eb --el-color-success-light-9 #b3e19d--el-color-success-light-5
 //#95d475 --el-color-success-light-3
@@ -74,59 +75,44 @@ import getImageColor from '@/util/getImageColor'
         const el = document.documentElement;
         settingCssVar(el,rgb)
     }
+    function setTimeoutHandle(){
+        return new Promise((resolve,reject)=>{
+            let id=null;
+            id=setTimeout(() => {
+                resolve(false);
+                clearTimeout(id);
+                id=null;
+            }, 1000);
+        })
+    }
     const reset=ref(false);
-    function resetHandler(){
+    async function resetHandler(){
         selectTheme.value='light';
         selectBtnColor('#409EFF');
-        selectColor.value='#409EFF'
+        selectColor.value='#409EFF';
+        store.switchTheme();
 
-        let id=null;
-        id=setTimeout(() => {
-            reset.value=false;
-            clearTimeout(id);
-            id=null;
-        }, 1000);
+        reset.value= await setTimeoutHandle()
     }
     const resetAngthing=ref(false);
     const storeSongs=useSongList();
     const sotreFormat=useFormat();
-    function resetAll(){
-        resetAngthing.value=true;
-        selectTheme.value='light';
-        store.switchTheme();
-        selectBtnColor('#409EFF');
-        selectColor.value='#409EFF';
-
+    async function resetAll(){
         storeSongs.pause();
         storeSongs.audio.removeEventListener('timeupdate', storeSongs.timeupdateHandler);
-        storeSongs.songs=[];
-        storeSongs.save={};
-        storeSongs.notPlaySongs=[];
-        storeSongs.audioInfo={};
-        storeSongs.visualClose={};
-        storeSongs.isPlay=false;
-        storeSongs.isPlaying=false;
+        storeSongs.$reset();
 
-        sotreFormat.formatList=[
-            'AAC',
-            'APE',
-            'FLAC',
-            'OGG',
-            'WAV',
-            'WMA',
-            'MP3',
-            'M4A',
-        ];
+        store.$reset();
+        store.switchTheme();
+        sotreFormat.$reset();
 
-        let id=null;
-        id=setTimeout(() => {
-            resetAngthing.value=false;
-            clearTimeout(id);
-            id=null;
-        }, 1000);
-
+        resetAngthing.value= await setTimeoutHandle()
     }
-
+    let resetFont=ref(false);
+    async function resetFontHandler(){
+        store.resetFont();
+        resetFont.value = await setTimeoutHandle()
+    }
 </script>
 <template>
     <div class="setting">
@@ -179,11 +165,29 @@ import getImageColor from '@/util/getImageColor'
                 />
             </div>
             <el-divider />
+            <div class="el-space-define">
+                <div class="setting-header">
+                <el-text size="small">字体</el-text>
+                <el-switch
+                        v-model="resetFont"
+                        inline-prompt
+                        inactive-text="重置"
+                        @click="resetFontHandler"
+                    />
+                </div>
+                <FontOption v-for="{option} in store.fontOptionList" :option="option" :key="option" />
+            </div>
         </div>
         <el-text style="color:var(--el-color-primary-light-4);" size="small">©point change audio 仅用于学习与交流</el-text>
     </div>
 </template>
 <style scoped>
+    .el-space-define{
+        display: grid;
+        gap: 1rem;
+        width: 100%;
+        box-sizing: border-box; 
+    }
     .setting{
         display: flex;
         flex-direction: column;

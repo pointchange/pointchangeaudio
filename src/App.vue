@@ -127,7 +127,7 @@ function minimizableHandler() {
           </div>
         </template>
         <template #content>
-          <span class="text-mini"> {{ store.audioInfo.currentSong }} </span>
+          <span> {{ store.audioInfo.currentSong }} </span>
         </template>
         <template #extra>
           <div class="header-right">
@@ -186,6 +186,7 @@ function minimizableHandler() {
 
 </template>
 <style>
+
 .lrc{
   letter-spacing: .1rem;
 }
@@ -215,10 +216,6 @@ function minimizableHandler() {
 .img-container img {
   width: 100%;
   height: 100%;
-}
-
-.text-mini {
-  font-size: var(--el-font-size-extra-small)
 }
 
 .fullScreen-not-full {

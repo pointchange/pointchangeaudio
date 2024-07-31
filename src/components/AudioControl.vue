@@ -139,12 +139,13 @@ function rateChange(value){
   store.audio.playbackRate=value;
 }
 
+let linearGradientFirstColor=computed(()=>storeTheme.selectTheme==='light'?'rgba(255,255,255,.8)':'rgba(0,0,0,.8)')
 </script>
 <template>
   <!-- <el-affix target="#app" position="bottom" > -->
   <Teleport to="body">
     <div class="control-container"
-      :style="{ backgroundImage: `linear-gradient( 109.6deg, rgba(255,255,255,.8) 11.2%, ${storeTheme.controlColor})` }">
+      :style="{ backgroundImage: `linear-gradient( 109.6deg, ${linearGradientFirstColor} 11.2%, ${storeTheme.controlColor})` }">
       <el-page-header class="el-page-header-ele" title=" ">
         <template #icon>
           <!-- <el-image style="width: 80px; height: 80px" 

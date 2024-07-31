@@ -4,6 +4,41 @@ export const useTheme = defineStore('theme', {
         selectTheme: 'light',
         selectColor: '#409EFF',
         controlColor: 'var(--el-color-primary-light-6)',
+        fontFamily: 'Microsoft YaHei',
+        fontSize: 'medium',
+        fontWeight: 400,
+        letterSpacing: 'normal',
+        fontFn: {
+            fontFamily: v => `Inter,${v}, Arial, sans-serif`,
+            fontSize: v => `var(--el-font-size-${v})`,
+            fontWeight: v => v,
+            letterSpacing: v => {
+                if (v === 'normal') {
+                    return v;
+                } else {
+                    return v + 'px';
+                }
+            },
+        },
+        fontOptionList: [
+            {
+                option: 'fontFamily',
+                init: 'Microsoft YaHei',
+            },
+            {
+                option: 'fontSize',
+                init: 'medium',
+            },
+            {
+                option: 'fontWeight',
+                init: 400,
+            },
+            {
+                option: 'letterSpacing',
+                init: 'normal',
+            },
+        ]
+
     }),
     actions: {
         init() {
@@ -11,6 +46,10 @@ export const useTheme = defineStore('theme', {
             const res = this.hexTransformRGB(this.selectColor);
             const el = document.documentElement;
             this.settingCssVar(el, res);
+            for (let i = 0; i < this.fontOptionList.length; i++) {
+                let prop = Object.values(this.fontOptionList[i])[0];
+                this.changeFont(Object.values(this[prop])[0], prop)
+            }
         },
         switchTheme() {
             const html = document.querySelector('html');
@@ -82,7 +121,20 @@ export const useTheme = defineStore('theme', {
                 el.style.setProperty(`--el-color-primary-light-${i + 1}`, `rgba(${res},0.${j})`)
                 j--;
             }
+        },
+
+        changeFont(v, option) {
+            document.documentElement.style[option] = this.fontFn[option](v);
+        },
+
+        resetFont() {
+            for (let i = 0; i < this.fontOptionList.length; i++) {
+                this[Object.values(this.fontOptionList[i])[0]] = Object.values(this.fontOptionList[i])[1];
+                this.changeFont(Object.values(this.fontOptionList[i])[1], [Object.values(this.fontOptionList[i])[0]])
+            }
         }
     },
-    persist: true,
+    persist: {
+        paths: ['selectTheme', 'selectColor', 'controlColor', 'fontFamily', 'fontSize', 'fontWeight', 'letterSpacing']
+    }
 })

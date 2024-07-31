@@ -14,7 +14,6 @@ import { filterNotSongType } from './util/fiterSong.js';
 import { getMusicInfo } from './util/getSongInfo.js';
 
 
-
 // if (bool) app.quit();
 
 // const { BrowserWindow, app, protocol, ipcMain, dialog, Menu, Tray, shell } = require('electron')
@@ -100,6 +99,7 @@ function createWindow() {
     });
     // win.loadURL('http://localhost:5173/');
     win.loadFile(join(__dirnameNew, './dist/index.html'));
+
     ipcMain.handle('on-get-win-size-wh', (e, w, h) => {
         win.setSize(w, h)
     })

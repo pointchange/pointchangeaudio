@@ -60,6 +60,14 @@ list:[
 | [music-metadata](https://github.com/Borewit/music-metadata) | 读取音频元信息 |
 | [animate.css](https://animate.style/) | 控制动画 |
 
+## 版本0.0.8
+
+1. 修复黑夜模式下的音乐控制按钮看不见的问题。
+
+2. 新增字体调整，可调整字体类型、大小、粗细、间隔。
+
+3. 优化定时器函数。
+
 ## 版本0.0.7
 
 1. 新增 "歌词" 功能。

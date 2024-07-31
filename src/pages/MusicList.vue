@@ -134,7 +134,7 @@ async function accurateGetAudioInfo(path){
         {{scope.row.album?scope.row.album:'未知' }}
       </template>
     </el-table-column> -->
-    <el-table-column align="right" width="150">
+    <el-table-column align="right" width="180">
       <template #header>
         <el-input v-model="search" placeholder="搜索" clearable />
       </template>
