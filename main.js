@@ -172,7 +172,8 @@ ipcMain.handle('on-open-directory', async (e) => {
         title: '选择文件夹',
         properties: ['openDirectory', 'multiSelections', 'showHiddenFiles']
     })
-    if (canceled) return;
+    if (canceled) return `取消添加`;
+    if (/[a-z]:\\$/i.test(filePaths[0])) return `不能查找根目录 ${filePaths[0]}`;
     const getAudioFileArray = [];
     async function getAudioFile(filePath) {
         const dirAndFileArray = await readdir(filePath);
@@ -188,11 +189,18 @@ ipcMain.handle('on-open-directory', async (e) => {
         }
         return getAudioFileArray;
     }
+
     for (let index = 0; index < filePaths.length; index++) {
         const filePath = filePaths[index];
-        getAudioFileArray.push(...await getAudioFile(filePath))
+        let arr = await getAudioFile(filePath).catch(error => {
+            return error;
+        })
+        if (Array.isArray(arr) && arr.length > 0) {
+            getAudioFileArray.push(...arr);
+        }
     }
     let songPathAndLrcObj = await filterNotSongType(getAudioFileArray);
+    // console.log(songPathAndLrcObj);
     return await getMusicInfo(songPathAndLrcObj)
 })
 let isVisual = false;
@@ -365,6 +373,15 @@ app.whenReady().then(() => {
             // let img = `data:${picture[0].format};base64,${picture[0].data.toString('base64')}`;
 
             return new Response(picture[0].data);
+        }
+        if (request.url.includes('cover')) {
+            let str = request.url.split('cover')[1];
+            let arr = str.split('/');
+            arr[0] = arr[0] + ':';
+            let str2 = arr.join('/');
+            const rs = createReadStream(str2)
+            const response = new Response(rs);
+            return response;
         }
     })
     protocol.handle('local-lrc', async (request) => {

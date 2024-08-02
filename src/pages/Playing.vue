@@ -59,6 +59,7 @@ import { nextTick, ref, watch } from 'vue';
     .playing{
         display: flex;
         align-items: flex-end;
+        width: 100%;
         /* background-color: var(--el-color-primary-light-6); */
         background-image: linear-gradient( 109.6deg,  rgba(255,255,255,.8) 11.2%, var(--el-color-primary-light-6));
     }

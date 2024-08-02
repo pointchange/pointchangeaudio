@@ -127,7 +127,13 @@ function minimizableHandler() {
           </div>
         </template>
         <template #content>
-          <span> {{ store.audioInfo.currentSong }} </span>
+          <Transition
+          name="header-title"
+          enter-active-class="animate__animated animate__slideInRight"
+          leave-active-class="animate__animated animate__slideOutLeft header-title-leave-active"
+          >
+            <div :key="store.audioInfo.currentSong"> {{ store.audioInfo.currentSong }} </div>
+          </Transition>
         </template>
         <template #extra>
           <div class="header-right">
@@ -186,7 +192,13 @@ function minimizableHandler() {
 
 </template>
 <style>
-
+.el-page-header__content{
+  position: relative;
+  overflow: hidden;
+}
+.header-title-leave-active{
+  position: absolute;
+}
 .lrc{
   letter-spacing: .1rem;
 }

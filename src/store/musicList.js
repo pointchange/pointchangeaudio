@@ -23,6 +23,9 @@ export const useSongList = defineStore('song-list', {
         currentSongLrc: [],
         currentTimeLrc: '',
         isShowLrc: false,
+        savePlayedSongs: [],
+        savePlayedSongsIndex: 0,
+        pre: false,
     }),
     getters: {
         isEmpty: state => state.songs.length,
@@ -83,10 +86,17 @@ export const useSongList = defineStore('song-list', {
         },
         async addDirectory() {
             const result = await electron.openDirectory().catch(error => {
-                ElMessage.error(String(error).split('@')[1])
+                if (String(error).includes('@')) {
+                    ElMessage.error(String(error).split('@')[1])
+                } else {
+                    ElMessage.error(error)
+                }
             });
-            if (!result) return;
-            this.addSongs(result);
+            if (Array.isArray(result)) {
+                this.addSongs(result);
+            } else {
+                ElMessage.error(result)
+            }
         },
         countTime(time) {
             let min = parseInt(time / 60);
@@ -101,6 +111,11 @@ export const useSongList = defineStore('song-list', {
         },
 
         async playCurrentMusic(path) {
+            if (!this.pre) {
+                this.savePlayedSongs.push(path);
+                this.savePlayedSongsIndex++;
+                this.pre = false;
+            }
             this.currentSongLrc = [];
             this.audioInfo.path = path;
             this.audioInfo.currentSong = this.getName(path, '', true);
@@ -262,14 +277,21 @@ export const useSongList = defineStore('song-list', {
                     case 2:
                         this.playCurrentMusic(this.find('')[index].path);
                         break;
-                }0
+                }
             }
         },
         nextSong(path) {
             this.switchSong(path);
         },
         preSong(path) {
-            this.switchSong(path, 0);
+            if (this.playOrder === 1 && this.savePlayedSongsIndex > 0) {
+                this.pre = true;
+                this.playCurrentMusic(this.savePlayedSongs[this.savePlayedSongsIndex - 1]);
+                this.savePlayedSongsIndex--;
+            } else {
+                this.savePlayedSongsIndex = this.savePlayedSongs.length;
+                this.switchSong(path, 0);
+            }
         },
         changeVolume(v) {
             this.audio.volume = v / 100

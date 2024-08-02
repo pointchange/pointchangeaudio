@@ -23,7 +23,9 @@ ffmpeg.setFfprobePath(ffprobePath.replace('app.asar', 'app.asar.unpacked'));
 function hasOwnPropertyDouble(obj, property1, property2) {
     if (!obj.hasOwnProperty(property1)) return false;
     if (!property2) return obj[property1];
+    if (!obj[property1]) return false;
     if (!obj[property1].hasOwnProperty(property2)) return false;
+    if (!obj[property1][property2]) return false;
     return obj[property1][property2];
 }
 function isNaNMetadata(value) {
@@ -38,18 +40,21 @@ async function getMusicInfo(songPathAndLrcObj, isAccurate = false) {
     let audioPathArray = songPathAndLrcObj.songPathArr || [];
     let lrcArray = songPathAndLrcObj.lrcArr || [];
     let songList = [];
-    if (isAccurate) {
+    async function ffmpegHanlder() {
         for (let index = 0; index < audioPathArray.length; index++) {
             const path = audioPathArray[index];
-            const metadata = await new Promise((resolve, reject) => {
+            let metadata = await new Promise((resolve, reject) => {
                 const rs = createReadStream(path);
                 ffmpeg(rs).ffprobe(function (err, metadata) {
                     resolve(metadata)
                     rs.close();
                 });
             });
-            // console.log(metadata);
+            if (Object.prototype.toString.call(metadata) !== '[object Object]') {
+                continue;
+            }
             songList.push({
+                songSize: isNaNMetadata(metadata.format.size),
                 duration: isNaNMetadata(metadata.format.duration),
                 container: isNaNMetadata(metadata.format.format_long_name),
                 sampleRate: isNaNMetadata(metadata.streams[0].sample_rate),
@@ -57,14 +62,22 @@ async function getMusicInfo(songPathAndLrcObj, isAccurate = false) {
                 artist: isNaNMetadata(metadata.format.artist),
                 album: isNaNMetadata(metadata.format.album),
                 bitrate: isNaNMetadata(metadata.format.bit_rate),
-
             });
         }
+    }
+    if (isAccurate) {
+        await ffmpegHanlder()
     } else {
         for (let index = 0; index < audioPathArray.length; index++) {
             const path = audioPathArray[index];
-            const metadata = await parseFile(path);
+            let metadata = await parseFile(path).catch(error => {
+                return;
+            });
+            if (Object.prototype.toString.call(metadata) !== '[object Object]') {
+                continue;
+            }
             const info = await stat(path);
+
             songList.push({
                 path,
                 songSize: info.size,
@@ -94,6 +107,7 @@ async function getMusicInfo(songPathAndLrcObj, isAccurate = false) {
                 // album: metadata.common.album,
                 // //每秒编码音频文件的比特数
                 // bitrate: metadata.format.bitrate,
+                // lrc: false,
             })
         }
     }
