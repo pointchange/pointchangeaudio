@@ -12,6 +12,15 @@
    /* overflow: hidden; */
  }
 
+ ::view-transition-new(root),
+ ::view-transition-old(root) {
+   animation: none;
+ }
+
+ .dark::view-transition-old(root) {
+   z-index: 100;
+ }
+
  @keyframes imgAnimation {
    0% {
      transform: scale(1);

@@ -1,14 +1,14 @@
 <script setup>
 import { useSongList } from '@/store/musicList';
 import { useSetting } from '@/store/setting';
-
+    defineProps(['src']);
     const store=useSongList();
     const storeSetting=useSetting();
 </script>
 <template>
     <!-- 此div 为了响应el-image为加载失败时click不能触发click事件 -->
     <div>
-        <el-image class="img-container-1" :src="store.audioInfo.pic?
+        <el-image class="img-container-1" :src="src?
             `local-img://picture${store.audioInfo.path}`
         :''" :fit="store.audioInfo.pic?'fill':storeSetting.imgFit" >
             <template #error v-if="storeSetting.imagePath">

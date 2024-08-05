@@ -87,11 +87,15 @@ import { usePosition } from '@/store/position';
         }
         loading.close()
     }
+
     async function addToAudioList(){
-        const pathList= store.doneList.map(item=>item.path);
+        const pathList= selectedList.value.map(item=>item.path);
         const res=await electron.getAudioInfo(pathList);
         storeSong.addSongs(res);
-        store.doneList.length=0;
+
+        store.doneList=store.doneList.filter(item=>{
+            return !pathList.some(path=>path===item.path);
+        })
     }
     const resizeObserver = new ResizeObserver(entries => {
         const {offsetTop}=entries[0].target;
@@ -112,7 +116,7 @@ import { usePosition } from '@/store/position';
         <template #header>
             <div class="card-header">
                 <el-button :disabled="selectedList.length?false:true" type="success" plain @click="startTransform" v-if="title==='开始转换'">{{title}} {{selectTotal}}</el-button>
-                <el-button type="success" plain @click="addToAudioList" v-else>{{title}} {{selectedDoneTotal}}</el-button>
+                <el-button :disabled="selectedList.length?false:true" type="success" plain @click="addToAudioList" v-else>{{title}} {{selectedDoneTotal}}</el-button>
             </div>
         </template>
         <el-table

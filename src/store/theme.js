@@ -51,25 +51,45 @@ export const useTheme = defineStore('theme', {
                 this.changeFont(Object.values(this[prop])[0], prop)
             }
         },
-        switchTheme() {
+        switchTheme(e) {
             const html = document.querySelector('html');
-            if (this.selectTheme === 'light' || this.selectTheme === 'dark') {
+            if (e) {
+                const transition = document.startViewTransition(() => {
+                    html.className = this.selectTheme;
+                });
+                transition.ready.then(() => {
+                    const { clientX, clientY } = e;
+                    const r = Math.hypot(Math.max(clientX, innerWidth - clientX), Math.max(clientY, innerHeight - clientY));
+                    const clipPath = [
+                        `circle(0% at ${clientX}px ${clientY}px )`,
+                        `circle(${r}px at ${clientX}px ${clientY}px )`
+                    ]
+                    html.animate(
+                        { clipPath: this.selectTheme === 'dark' ? clipPath.reverse() : clipPath },
+                        {
+                            duration: 500,
+                            pseudoElement: this.selectTheme === 'dark' ? '::view-transition-old(root)' : '::view-transition-new(root)'
+                        }
+                    )
+                })
+            } else {
                 html.className = this.selectTheme;
             }
-            if (this.selectTheme === 'followSystem') {
-                if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+        },
+        followSystem() {
+            const html = document.querySelector('html');
+            if (window.matchMedia("(prefers-color-scheme: light)").matches) {
+                html.className = 'light';
+            } else {
+                html.className = 'dark';
+            }
+            window.matchMedia("(prefers-color-scheme: light)").addEventListener('change', e => {
+                if (e.matches) {
                     html.className = 'light';
                 } else {
                     html.className = 'dark';
                 }
-                window.matchMedia("(prefers-color-scheme: light)").addEventListener('change', e => {
-                    if (e.matches) {
-                        html.className = 'light';
-                    } else {
-                        html.className = 'dark';
-                    }
-                })
-            }
+            })
         },
         alphabetTransformNumber(value) {
             value = String(value).toUpperCase();

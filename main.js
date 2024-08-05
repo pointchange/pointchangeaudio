@@ -166,41 +166,60 @@ ipcMain.handle('on-get-lrc-path', async (e, lrcPath) => {
     return lrcArr;
 })
 
-ipcMain.handle('on-open-directory', async (e) => {
+
+async function getAudioFile(filePath) {
+    const dirAndFileArray = await readdir(filePath);
+    let getAudioFileArray = [];
+    for (let j = 0; j < dirAndFileArray.length; j++) {
+        const path = join(filePath, dirAndFileArray[j]);
+        if (/System Volume Information/gi.test(path)) continue;
+        const st = await stat(path);
+        if (st.isDirectory()) {
+            getAudioFileArray.push(...await getAudioFile(path))
+        } else {
+            getAudioFileArray.push(path)
+        }
+    }
+    return getAudioFileArray;
+}
+async function getFiles() {
     win.focus();
     const { canceled, filePaths } = await dialog.showOpenDialog(win, {
         title: '选择文件夹',
         properties: ['openDirectory', 'multiSelections', 'showHiddenFiles']
     })
     if (canceled) return `取消添加`;
-    if (/[a-z]:\\$/i.test(filePaths[0])) return `不能查找根目录 ${filePaths[0]}`;
-    const getAudioFileArray = [];
-    async function getAudioFile(filePath) {
-        const dirAndFileArray = await readdir(filePath);
-        let getAudioFileArray = [];
+    // if (/[a-z]:\\$/i.test(filePaths[0])) return `不能查找根目录 ${filePaths[0]}`;
+    if (/[a-z]:\\$/i.test(filePaths[0])) {
+        // const res = await stat(filePaths[0]);
+        const dirAndFileArray = await readdir(filePaths[0]);
+        const res = [];
         for (let j = 0; j < dirAndFileArray.length; j++) {
-            const path = join(filePath, dirAndFileArray[j])
+            const path = join(filePaths[0], dirAndFileArray[j])
+            if (/System Volume Information/gi.test(path)) continue;
             const st = await stat(path);
-            if (st.isDirectory()) {
-                getAudioFileArray.push(...await getAudioFile(path))
-            } else {
-                getAudioFileArray.push(path)
+            if (!st.isDirectory()) {
+                res.push(path);
             }
         }
-        return getAudioFileArray;
-    }
-
-    for (let index = 0; index < filePaths.length; index++) {
-        const filePath = filePaths[index];
-        let arr = await getAudioFile(filePath).catch(error => {
-            return error;
-        })
-        if (Array.isArray(arr) && arr.length > 0) {
-            getAudioFileArray.push(...arr);
+        return res;
+    } else {
+        const getAudioFileArray = [];
+        for (let index = 0; index < filePaths.length; index++) {
+            const filePath = filePaths[index];
+            let arr = await getAudioFile(filePath).catch(error => {
+                return error;
+            })
+            if (Array.isArray(arr) && arr.length > 0) {
+                getAudioFileArray.push(...arr);
+            }
         }
+        return getAudioFileArray
     }
+}
+ipcMain.handle('on-open-directory', async () => {
+    const getAudioFileArray = await getFiles();
     let songPathAndLrcObj = await filterNotSongType(getAudioFileArray);
-    // console.log(songPathAndLrcObj);
     return await getMusicInfo(songPathAndLrcObj)
 })
 let isVisual = false;
@@ -231,18 +250,13 @@ ipcMain.handle('on-delet-done', async (e, path) => {
     return await unlink(path);
 });
 ipcMain.handle('on-transform-open-directory', async (e) => {
-    const { canceled, filePaths } = await dialog.showOpenDialog(win, {
-        title: '选择文件夹',
-        properties: ['openDirectory', 'multiSelections', 'showHiddenFiles']
-    })
-    if (canceled) return;
-    const fileList = await readdir(filePaths[0]);
-    const availableSongTypeList = await filterNotSongType(fileList);
+    const getAudioFileArray = await getFiles();
+    const resultObj = await filterNotSongType(getAudioFileArray);
     let res = [];
-    availableSongTypeList.forEach(item => {
+    resultObj.songPathArr.forEach(item => {
         res.push({
-            name: item,
-            path: join(filePaths[0], item),
+            name: item.replace(/[\s\S.]+\\/, ''),
+            path: item,
             isSelect: true,
             progress: 0,
         })
@@ -250,7 +264,7 @@ ipcMain.handle('on-transform-open-directory', async (e) => {
     return res;
 });
 ipcMain.handle('on-get-audio-infor', async (e, pathList) => {
-    return await getMusicInfo({ pathList })
+    return await getMusicInfo({ songPathArr: pathList })
 });
 
 let winChild;

@@ -19,7 +19,7 @@ const store = useSongList();
 const { nextSong, preSong, play, pause, changeVolume, addDirectory, countTime, changeProgress } = store;
 const volumeValue = ref(100);
 let progressValue = ref(0);
-const isEmpty = computed(() => store.songs.length);
+const isEmpty = computed(() => store.songs.length>0?true:false);
 const classStr = ref('loop-all');
 function changePlayOrderHandler() {
   switch (store.playOrder) {
@@ -45,6 +45,7 @@ function changePlayOrder() {
 const isSaveEmpty = computed(() => JSON.stringify(store.save) === '{}')
 const isDisabled = computed(() => !isEmpty.value || isSaveEmpty.value);
 onMounted(() => {
+  store.init();
   electron.mainControlPlay((e, bool) => {
     if (bool) {
       play();
@@ -174,7 +175,7 @@ let linearGradientFirstColor=computed(()=>{
               <!-- <el-image style="width: 80px; height: 80px" :src="store.audioInfo.pic?
                 `local-img://picture${store.audioInfo.path}`
                 :''" fit="fill" />  -->
-              <Image class="image" @click="openPlayingPage" />
+              <Image class="image" @click="openPlayingPage" :src="store.audioInfo.pic" />
               <!-- <el-image style="width: 80px; height: 80px" src="" fit="fill" /> -->
             </template>
             <template #content>

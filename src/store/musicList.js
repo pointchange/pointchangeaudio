@@ -58,8 +58,61 @@ export const useSongList = defineStore('song-list', {
         }
     },
     actions: {
+        init() {
+            this.audio.addEventListener('error', () => {
+                ElMessageBox.confirm(`可能是有不支持的音频文件，也可能是音频文件不存在。是否要移除当前 ${this.audioInfo.path}的文件`, '播放失败',
+                    {
+                        confirmButtonText: '确认',
+                        cancelButtonText: '取消',
+                        type: 'warning',
+                    })
+                    .then(() => {
+                        that.deleteSongListItem(this.audioInfo.path);
+                        ElMessage({
+                            type: 'success',
+                            message: '删除成功',
+                        })
+                    })
+                    .catch(() => {
+                        ElMessage({
+                            type: 'info',
+                            message: '删除 取消',
+                        })
+                    });
+                // e.target.removeEventListener('error', audioError);
+            })
+            // this.audio.addEventListener('durationchange',()=>{
+
+            // })
+            this.audio.addEventListener("loadeddata", () => {
+                // if ('onerror' in this.audio) {
+                //     this.audio.removeEventListener('error', errorDailog);
+                // }
+                // if ('ondurationchange' in this.audio) {
+                //     this.audio.removeEventListener('durationchange', that.initDuration);
+                // }
+                this.play();
+                this.audioInfo.duration = this.countTime(this.audio.duration);
+                this.audioInfo.currentTime = this.countTime(this.audio.currentTime);
+                if (JSON.stringify(this.save) === '{}') {
+                    this.save = {
+                        c: this.audio.currentTime,
+                        d: this.audio.duration,
+                        path: this.audioInfo.path,
+                        currentSong: this.audioInfo.currentSong,
+                        duration: this.audioInfo.duration,
+                        currentTime: this.audioInfo.currentTime,
+                    }
+                }
+            });
+            this.audio.addEventListener('timeupdate', this.timeupdateHandler);
+            this.audio.addEventListener('ended', () => {
+                this.nextSong(this.audioInfo.path);
+            });
+        },
         availebleSongs(songs) {
             const uniqueNotPlaySongs = songs.filter(item => !this.notPlaySongs.some(v => v.path === item.path));
+            // return songs;
             return uniqueNotPlaySongs.filter(item => {
                 if (/.(ape|wma)/ig.test(item.path)) {
                     this.notPlaySongs.push(item)
@@ -99,15 +152,18 @@ export const useSongList = defineStore('song-list', {
             }
         },
         countTime(time) {
-            let min = parseInt(time / 60);
-            if (min < 10) {
-                min = '0' + min;
+            function isUnitsDigit(n) {
+                if (n < 10) {
+                    n = '0' + n;
+                }
+                return n;
             }
-            let second = Math.round(time % 60);
-            if (second < 10) {
-                second = '0' + second;
-            }
-            return `${min}:${second}`;
+
+            let hour = isUnitsDigit(Math.floor(time / 3600));
+            let min = isUnitsDigit(Math.floor(time / 60) % 60);
+            let second = isUnitsDigit(Math.floor(time % 60));
+
+            return (hour > 0 ? `${hour}:` : '') + `${min}:${second}`;
         },
 
         async playCurrentMusic(path) {
@@ -138,62 +194,6 @@ export const useSongList = defineStore('song-list', {
                 this.currentSongLrc = await electron.onGetLrc(filterCurrentSongObj.lrc);
             }
             this.audio.src = 'local-audio://' + path;
-            //播放错误处理
-            let that = this;
-            this.audio.addEventListener('error', function audioError(e) {
-                ElMessageBox.confirm(`可能是有不支持的音频文件，也可能是音频文件不存在。是否要移除当前 ${path}的文件`, '播放失败',
-                    {
-                        confirmButtonText: '确认',
-                        cancelButtonText: '取消',
-                        type: 'warning',
-                    })
-                    .then(() => {
-                        that.deleteSongListItem(path);
-                        ElMessage({
-                            type: 'success',
-                            message: '删除成功',
-                        })
-                    })
-                    .catch(() => {
-                        ElMessage({
-                            type: 'info',
-                            message: '删除 取消',
-                        })
-                    });
-                e.target.removeEventListener('error', audioError);
-            })
-
-
-            const loadeddataHandler = async () => {
-                // if ('onerror' in this.audio) {
-                //     this.audio.removeEventListener('error', errorDailog);
-                // }
-                if ('ondurationchange' in this.audio) {
-                    this.audio.removeEventListener('durationchange', this.initDuration);
-                }
-                this.play();
-                this.audioInfo.duration = this.countTime(this.audio.duration);
-                this.audioInfo.currentTime = this.countTime(this.audio.currentTime);
-                if (JSON.stringify(this.save) === '{}') {
-                    this.save = {
-                        c: this.audio.currentTime,
-                        d: this.audio.duration,
-                        path,
-                        currentSong: this.audioInfo.currentSong,
-                        duration: this.audioInfo.duration,
-                        currentTime: this.audioInfo.currentTime,
-                    }
-                }
-            }
-
-            this.audio.addEventListener("loadeddata", () => {
-                loadeddataHandler();
-                this.audio.removeEventListener('loadeddata', loadeddataHandler);
-            });
-            this.audio.addEventListener('timeupdate', this.timeupdateHandler);
-            this.audio.addEventListener('ended', () => {
-                this.nextSong(path);
-            });
             //active song
             this.songs.forEach(v => {
                 if (v.path === path) {
@@ -243,7 +243,11 @@ export const useSongList = defineStore('song-list', {
             let index = 0;
             if (!this.audio.src) {
                 this.playCurrentMusic(this.save.path);
-                this.audio.addEventListener('durationchange', this.initDuration)
+                let that = this;
+                this.audio.addEventListener('durationchange', function durationchangeHandler() {
+                    that.changeProgress(that.save.c)
+                    this.removeEventListener('durationchange', durationchangeHandler)
+                })
             }
             electron.changeTrayIcon(true);
             this.audio.play();

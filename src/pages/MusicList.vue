@@ -42,7 +42,17 @@ function deleteHandler(row){
       })
     })
 }
-const fileAndlen=computed(()=>'文件 '+store.songs.length);
+const fileAndlen=computed(()=>{
+  // '文件 '+store.songs.length
+  const n= store.songs.reduce((pre,cur,i,arr)=>{
+    pre=pre+cur.duration;
+    if(i===arr.length-1){
+      pre=store.countTime(pre)
+    }
+    return pre;
+  },0);
+  return '文件：'+store.songs.length+' 总时长：'+n;
+});
 const elTableRef=ref(null);
 //el-scrollbar__view
 watch(()=>store.audioInfo.path,(path)=>{
@@ -124,7 +134,7 @@ async function accurateGetAudioInfo(path){
         {{scope.row.title?scope.row.title:'未知' }}
       </template>
     </el-table-column> -->
-    <el-table-column label="作者" >
+    <el-table-column label="作者">
       <template #default="scope">
         {{scope.row.artist?scope.row.artist:'未知' }}
       </template>
@@ -153,6 +163,9 @@ async function accurateGetAudioInfo(path){
   </Teleport>
 </template>
 <style scoped>
+    .artist{
+      width: fit-content;
+    }
     .position-song{
       position: absolute;
       right: 20px;

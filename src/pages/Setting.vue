@@ -1,5 +1,5 @@
 <script setup>
-import { UploadFilled,Right } from '@element-plus/icons-vue'
+import { UploadFilled } from '@element-plus/icons-vue'
 import { computed, onMounted, ref } from 'vue';
 import { ElMessage} from 'element-plus'
 import { useTheme } from '@/store/theme';
@@ -27,26 +27,6 @@ import { useDrop } from '@/util/drop';
         '#409EFF',
         '#6222C9',
     ];
-    function radioChangeHandler(){
-        const html= document.querySelector('html');
-        if(selectTheme.value==='light'||selectTheme.value==='dark'){
-           html.className=selectTheme.value;
-        }
-        if(selectTheme.value==='followSystem'){
-            if(window.matchMedia('(prefers-color-scheme: light)').matches){
-                html.className='light';
-            }else{
-                html.className='dark';
-            }
-            window.matchMedia("(prefers-color-scheme: light)").addEventListener('change',e=>{
-                if(e.matches){
-                   html.className='light';
-                }else{
-                   html.className='dark';
-                }
-            })
-        }
-    }
 
     function selectBtnColor(color){
         const el = document.documentElement;
@@ -149,9 +129,6 @@ import { useDrop } from '@/util/drop';
         resetImage.value= await setTimeoutHandle();
     }
     const imgFitList=['fill','contain','cover','none','scale-down',];
-    function changeImgFit(v){
-        storeSetting.imgFit=v;
-    }
 </script>
 <template>
     <el-scrollbar >
@@ -168,10 +145,10 @@ import { useDrop } from '@/util/drop';
                 </div>
                 <el-divider />
                 <div class="theme-container">
-                    <el-radio-group v-model="selectTheme" @change="radioChangeHandler">
-                        <el-radio value="light" size="large">白天</el-radio>
-                        <el-radio value="dark" size="large">黑夜</el-radio>
-                        <el-radio value="followSystem" size="large">
+                    <el-radio-group v-model="selectTheme" >
+                        <el-radio value="light" size="large" @click="e=>store.switchTheme(e)">白天</el-radio>
+                        <el-radio value="dark" size="large" @click="e=>store.switchTheme(e)" >黑夜</el-radio>
+                        <el-radio value="followSystem" size="large" @click="()=>store.followSystem()">
                             跟随系统
                         </el-radio>
                     </el-radio-group>
@@ -256,7 +233,7 @@ import { useDrop } from '@/util/drop';
                             <el-tag type="primary">自定义音频无封面时的图片</el-tag>
                         </div>
 
-                        <Image class="right"/>
+                        <Image class="right" :src="false"/>
                     </div>
                 </div>
             </div>
