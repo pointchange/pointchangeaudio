@@ -1,4 +1,5 @@
 import './assets/main.css'
+import './assets/fullscreen.css'
 import {
     ElButton,
     ElTable,

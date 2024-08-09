@@ -8,6 +8,7 @@ export const useTheme = defineStore('theme', {
         fontSize: 'medium',
         fontWeight: 400,
         letterSpacing: 'normal',
+        isPicColor: false,
         fontFn: {
             fontFamily: v => `Inter,${v}, Arial, sans-serif`,
             fontSize: v => `var(--el-font-size-${v})`,

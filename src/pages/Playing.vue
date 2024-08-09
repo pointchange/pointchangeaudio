@@ -1,15 +1,13 @@
 <script setup>
 import { useSongList } from '@/store/musicList';
-import Image from '@/components/Image.vue';
 import { usePosition } from '@/store/position';
-import { nextTick, ref, watch } from 'vue';
-import { useTheme } from '@/store/theme';
-import { useSetting } from '@/store/setting';
+import { computed, nextTick, ref, watch } from 'vue';
+
+import FullscreenOnPlaying from '@/components/FullscreenOnPlaying.vue';
+import PicAndSong from '@/components/PicAndSong.vue';
     const store=useSongList();
     const {getName,countTime,playCurrentMusic}=store;
     const storePos=usePosition();
-    const storeTheme=useTheme();
-    const storeSetting=useSetting();
     const elTableRef=ref(null);
     watch(()=>store.audioInfo.path,async(path)=>{
         const data=elTableRef.value.data.filter(item=>item.path===path);
@@ -23,45 +21,32 @@ import { useSetting } from '@/store/setting';
         let listTop = document.querySelector('.el-table__body').getBoundingClientRect().top;
         elTableRef.value.setScrollTop(row.getBoundingClientRect().top-listTop-(storePos.clientHeight-160-300-40)/2)
     });
-    const btnType=ref('primary');
-    // let isPictureColor=ref(false);
-    function changeColor(){
-        storeSetting.isPictureColor=!storeSetting.isPictureColor;
-        if(storeSetting.isPictureColor){
-            btnType.value='';
-        }else{
-            btnType.value='primary';
+ 
+    const playingRef=ref(null);
+    let isFullscreen=ref(false);
+    function fullscreenHandler(){
+        if (!document.fullscreenElement) {
+            playingRef.value.requestFullscreen();
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
         }
     }
-    // const playingRef=ref(null);
-    // let isFullscreen=ref(false);
-    // async function fullscreenHandler(){
-    //     playingRef.value.requestFullscreen();
-    //     isFullscreen.value = document.fullscreenElement !== null;
-    //     if(isFullscreen.value){
-    //         document.exitFullscreen();
-    //     }
-    // }
+
+    let isMaxH=computed(()=>isFullscreen.value?{height:'100%'}:{height:'auto'})
 </script>
 <template>
-    <div style="position: relative;overflow: hidden;">
+    <div ref="playingRef" class="play" @fullscreenchange="isFullscreen=!isFullscreen" >
         <Transition
         name="playing"
         enter-active-class="animate__animated animate__slideInRight"
         leave-active-class="animate__animated animate__slideOutLeft playing-leave-active"
+        appear
         >
-            <div class="playing" ref="playingRef" :key="store.audioInfo.path" :style="{'background-image':` linear-gradient( 109.6deg,  rgba(255,255,255,.8) 11.2%, ${storeSetting.isPictureColor?storeTheme.controlColor:'var(--el-color-primary-light-6)'})`}">
-                <div class="playing-container">
-                    <Image  class="el-image-class" :src="store.audioInfo.pic" />
-                    <div class="song">
-                        <el-space class="space" direction="vertical">
-                            <div class="title">{{store.audioInfo.title}}</div>
-                            <div class="name">{{store.audioInfo.artist}}</div>
-                        </el-space>
-                    </div>
-                </div>
-                <el-button type="primary" :color="storeSetting.isPictureColor?storeTheme.controlColor:''"  @click="changeColor">{{storeSetting.isPictureColor?'主题色':'封面色'}}</el-button>
-                <!-- <el-button type="primary" @click="fullscreenHandler">点击</el-button> -->
+            <div class="playing" :style="isMaxH" :key="store.audioInfo.path">
+                <PicAndSong v-if="!isFullscreen" :fullscreenHandler="fullscreenHandler" :isShowBg="true" />
+                <FullscreenOnPlaying v-else :fullscreenHandler="fullscreenHandler" />
             </div>
         </Transition>
     </div>
@@ -80,32 +65,15 @@ import { useSetting } from '@/store/setting';
     </el-table>
 </template>
 <style scoped>
-    .playing-leave-active {
-        position: absolute;
-    }
-    .playing-container{
-        display: flex;
-        align-items: flex-end;
+    .play{
+        position: relative;
+        overflow: hidden; 
+        width: 100%;
     }
     .playing{
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
         width: 100%;
-        /* background-color: var(--el-color-primary-light-6); */
-        background-image: linear-gradient( 109.6deg,  rgba(255,255,255,.8) 11.2%, var(--el-color-primary-light-6));
     }
-    .el-image-class{
-        width: 300px;
-        height: 300px;
-    }
-    .space{
-        font-family:'PingFang SC';
-        font-weight: 100;
-        font-size: 2rem;
-        letter-spacing: .1rem;
-    }
-    .name{
-        font-size: 1rem;
+    .playing-leave-active {
+        position: absolute;
     }
 </style>

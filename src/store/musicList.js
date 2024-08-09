@@ -84,7 +84,8 @@ export const useSongList = defineStore('song-list', {
             // this.audio.addEventListener('durationchange',()=>{
 
             // })
-            this.audio.addEventListener("loadeddata", () => {
+            //loadeddata 有杂音
+            this.audio.addEventListener("canplaythrough", () => {
                 // if ('onerror' in this.audio) {
                 //     this.audio.removeEventListener('error', errorDailog);
                 // }
@@ -214,6 +215,12 @@ export const useSongList = defineStore('song-list', {
                 if (this.audio.currentTime + 1 >= this.currentSongLrc[index].time && ((!this.currentSongLrc[index + 1]) || this.audio.currentTime < this.currentSongLrc[index + 1].time)) {
                     this.currentTimeLrc = this.currentSongLrc[index].text;
                 }
+                if (this.audio.currentTime >= this.currentSongLrc[index].time && ((!this.currentSongLrc[index + 1]) || this.audio.currentTime < this.currentSongLrc[index + 1].time)) {
+                    this.currentSongLrc[index].isActive = true;
+                } else {
+                    this.currentSongLrc[index].isActive = false;
+                }
+
             }
         },
         pause() {

@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AudioControl: typeof import('./src/components/AudioControl.vue')['default']
+    ControlBtn: typeof import('./src/components/ControlBtn.vue')['default']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
@@ -44,8 +45,11 @@ declare module 'vue' {
     ElText: typeof import('element-plus/es')['ElText']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     FontOption: typeof import('./src/components/FontOption.vue')['default']
+    FullscreenOnPlaying: typeof import('./src/components/FullscreenOnPlaying.vue')['default']
     Image: typeof import('./src/components/Image.vue')['default']
     MusicListItem: typeof import('./src/components/MusicListItem.vue')['default']
+    PicAndSong: typeof import('./src/components/PicAndSong.vue')['default']
+    ProgressBar: typeof import('./src/components/ProgressBar.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TransformAudioCard: typeof import('./src/components/TransformAudioCard.vue')['default']

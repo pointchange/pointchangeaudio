@@ -71,7 +71,12 @@ async function accurateGetAudioInfo(path){
   const res=await electron.accurateGetAudioInfo([path]);
   for (let index = 0; index < store.songs.length; index++) {
     if(store.songs[index].path===path){
-      store.songs[index]={...store.songs[index],...res[0]}
+      // store.songs[index]={...store.songs[index],...res[0]}
+      for (const key in store.songs[index]) {
+        if(!store.songs[index][key]&&res[0][key]){
+          store.songs[index][key]=res[0][key];
+        }
+      }
     }
   }
 }

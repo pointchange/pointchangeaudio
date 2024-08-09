@@ -1,26 +1,28 @@
 <script setup>
 import {
   Plus,
-  ArrowLeft,
-  ArrowRight,
-  VideoPause,
-  VideoPlay,
   Microphone,
 } from '@element-plus/icons-vue';
-import { ElMessage,ElNotification } from 'element-plus'
-import { ref, onMounted, watch, computed, watchEffect } from 'vue';
+import { ElNotification } from 'element-plus'
+import { ref, onMounted, watch } from 'vue';
 import { useSongList } from '@/store/musicList';
 import Image from './Image.vue';
 import { useRouter } from 'vue-router';
 import getImageColor from '@/util/getImageColor';
 import { useTheme } from '@/store/theme';
-
+import ControlBtn from './ControlBtn.vue';
+import ProgressBar from './ProgressBar.vue';
+import { useEmpty } from '@/util/empty';
+import { useGradient } from '@/util/grandientColorChange';
 const store = useSongList();
-const { nextSong, preSong, play, pause, changeVolume, addDirectory, countTime, changeProgress } = store;
+const {  play, pause, changeVolume, addDirectory } = store;
 const volumeValue = ref(100);
-let progressValue = ref(0);
-const isEmpty = computed(() => store.songs.length>0?true:false);
 const classStr = ref('loop-all');
+const {
+        isEmpty,
+        isSaveEmpty,
+        isDisabled
+    }=useEmpty(store);
 function changePlayOrderHandler() {
   switch (store.playOrder) {
     case 0:
@@ -42,8 +44,7 @@ function changePlayOrder() {
   store.playOrder++;
   changePlayOrderHandler();
 }
-const isSaveEmpty = computed(() => JSON.stringify(store.save) === '{}')
-const isDisabled = computed(() => !isEmpty.value || isSaveEmpty.value);
+
 onMounted(() => {
   store.init();
   electron.mainControlPlay((e, bool) => {
@@ -61,7 +62,7 @@ onMounted(() => {
     }
   });
   changePlayOrderHandler();
-  if (!isEmpty.value) {
+  if (isEmpty.value) {
     store.audioInfo = {};
     store.save = {};
   }
@@ -79,31 +80,6 @@ onMounted(() => {
   }
 });
 
-let stopCurrentTime = ref(false);
-function formatTooltip(value) {
-  return countTime(value)
-}
-function changeH(value) {
-  changeProgress(value);
-  stopCurrentTime.value = false;
-}
-function inputH(value) {
-  stopCurrentTime.value = true;
-}
-
-//性能有问题
-watch(() => store.audioInfo.c, () => {
-  if (stopCurrentTime.value) return;
-  progressValue.value = store.audioInfo.c;
-}, { immediate: true });
-
-function isPlayHandler() {
-  if (store.isPlaying) {
-    pause();
-  } else {
-    play();
-  }
-}
 const route = useRouter();
 function openPlayingPage() {
   route.push('/playing');
@@ -139,22 +115,8 @@ let rateList=[0.5,0.8,1,1.25,1.5,2];
 function rateChange(value){
   store.audio.playbackRate=value;
 }
+const {gradientColor}=useGradient(storeTheme);
 
-let linearGradientFirstColor=computed(()=>{
-  switch (storeTheme.selectTheme) {
-    case 'light':
-      return 'rgba(255,255,255,.8)';
-    case 'dark':
-      return 'rgba(0,0,0,.8)'
-    default:
-      if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-        return 'rgba(255,255,255,.8)';
-      } else {
-          return 'rgba(0,0,0,.8)'
-      }
-  }
-
-})
 </script>
 <template>
   <!-- <el-affix target="#app" position="bottom" > -->
@@ -165,7 +127,7 @@ let linearGradientFirstColor=computed(()=>{
         leave-active-class="animate__animated animate__fadeOut"
         >
         <div class="control-container"
-          :style="{ backgroundImage: `linear-gradient( 109.6deg, ${linearGradientFirstColor} 11.2%, ${storeTheme.controlColor})` }" :key="storeTheme.controlColor">
+          :style="{ backgroundImage: `linear-gradient( 109.6deg, ${gradientColor} 11.2%, ${storeTheme.controlColor})` }" :key="storeTheme.controlColor">
           <el-page-header class="el-page-header-ele" title=" ">
             <template #icon>
               <!-- <el-image style="width: 80px; height: 80px" 
@@ -179,14 +141,9 @@ let linearGradientFirstColor=computed(()=>{
               <!-- <el-image style="width: 80px; height: 80px" src="" fit="fill" /> -->
             </template>
             <template #content>
-              <el-button :disabled="isDisabled" class="el-button-icon" circle size="large" type="" text="" plain
-                :icon="ArrowLeft" @click="() => preSong(store.audioInfo.path)"></el-button>
-              <el-button :disabled="isDisabled" class="el-button-icon" circle size="large" type="" text="" plain
-                :icon="store.isPlaying ? VideoPause : VideoPlay" @click="isPlayHandler"></el-button>
-              <!-- <el-button :disabled="isDisabled" class="el-button-icon" circle size="large" type="" text="" plain :icon="VideoPause"
-                @click="pause"></el-button> -->
-              <el-button :disabled="isDisabled" class="el-button-icon" circle size="large" type="" text="" plain
-                :icon="ArrowRight" @click="() => nextSong(store.audioInfo.path)"></el-button>
+
+              <ControlBtn fontSize="1.4rem" :isDisabled="isDisabled"/>
+              
               <el-popover placement="right" trigger="click">
                 <template #reference>
                   <el-button :disabled="isDisabled" class="el-button-icon" circle size="large" type="" text="" plain
@@ -232,7 +189,7 @@ let linearGradientFirstColor=computed(()=>{
                 </template>
                 <el-segmented v-model="rateValue" :options="rateList" size="default" @change="rateChange" />
               </el-popover>
-              <el-button :disabled="isDisabled" class="el-button-icon" type="" size="large" text="" circle @click="store.isShowLrc=!store.isShowLrc" :class="{'show-lrc':store.isShowLrc}" >
+              <el-button :disabled="isDisabled" class="el-button-icon" type="" text="" size="large" circle @click="store.isShowLrc=!store.isShowLrc" :class="{'show-lrc':store.isShowLrc}" >
                 <template #default>
                   <span class="font-size-PingFang-SC">词</span>
                 </template>
@@ -244,16 +201,7 @@ let linearGradientFirstColor=computed(()=>{
               </el-tooltip>
             </template>
           </el-page-header>
-          <div class="progress-container">
-            <el-slider :disabled="!store.isPlay" class="progress-slider" v-model="progressValue" :max="store.audioInfo.d"
-              @change="changeH" :format-tooltip="formatTooltip" @input="inputH" />
-            <div class="mx-1">
-              <el-space spacer="|">
-                <el-text size="small">{{ store.audioInfo.currentTime }}</el-text>
-                <el-text size="small">{{ store.audioInfo.duration }}</el-text>
-              </el-space>
-            </div>
-          </div>
+          <ProgressBar class="progress-container" />
         </div>
       </Transition>
   </Teleport>
@@ -262,7 +210,8 @@ let linearGradientFirstColor=computed(()=>{
 </template>
 <style scoped>
 .show-lrc{
-  box-shadow: var(--el-box-shadow-lighter);
+  /* box-shadow: var(--el-box-shadow-lighter); */
+  border: 2px solid var(--el-border-color);
 }
 .font-size-PingFang-SC{
   font-family:'PingFang SC';
@@ -285,24 +234,12 @@ let linearGradientFirstColor=computed(()=>{
   font-size: 1.4rem;
 }
 
-.progress-slider {
-  margin: 0;
-}
-
 .progress-container {
   padding: 0 5rem;
   position: absolute;
   bottom: 62px;
   width: 100%;
   box-sizing: border-box;
-}
-
-.mx-1 {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: -10px;
-  ;
 }
 
 .add-btn {

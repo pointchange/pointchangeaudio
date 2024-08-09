@@ -219,6 +219,7 @@ async function getFiles() {
 }
 ipcMain.handle('on-open-directory', async () => {
     const getAudioFileArray = await getFiles();
+    if (!Array.isArray(getAudioFileArray)) return getAudioFileArray;
     let songPathAndLrcObj = await filterNotSongType(getAudioFileArray);
     return await getMusicInfo(songPathAndLrcObj)
 })
@@ -312,7 +313,7 @@ ipcMain.handle('on-visual-close', (e, currentSongInfo) => {
 });
 
 ipcMain.handle('on-accurate-get-audio-info', async (e, pathList) => {
-    return await getMusicInfo({ pathList }, true)
+    return await getMusicInfo({ songPathArr: pathList }, true)
 });
 
 Menu.setApplicationMenu(null);

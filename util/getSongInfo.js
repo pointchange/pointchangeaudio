@@ -20,13 +20,13 @@ import { createReadStream } from 'node:fs';
 ffmpeg.setFfmpegPath(ffmpegPath.replace('app.asar', 'app.asar.unpacked'));
 ffmpeg.setFfprobePath(ffprobePath.replace('app.asar', 'app.asar.unpacked'));
 //失败统一false
-function hasOwnPropertyDouble(obj, property1, property2) {
+function repeatHasOwnProperty(obj, property1, property2, property3) {
     if (!obj.hasOwnProperty(property1)) return false;
-    if (!property2) return obj[property1];
-    if (!obj[property1]) return false;
+    if (!property2 && obj[property1]) return obj[property1];
     if (!obj[property1].hasOwnProperty(property2)) return false;
-    if (!obj[property1][property2]) return false;
-    return obj[property1][property2];
+    if (!property3 && obj[property1][property2]) return obj[property1][property2];
+    if (!obj[property1][property2].hasOwnProperty(property3)) return false;
+    if (obj[property1][property2][property3]) return obj[property1][property2][property3];
 }
 function isNaNMetadata(value) {
     if (value === 'N/A') {
@@ -54,14 +54,14 @@ async function getMusicInfo(songPathAndLrcObj, isAccurate = false) {
                 continue;
             }
             songList.push({
-                songSize: isNaNMetadata(metadata.format.size),
-                duration: isNaNMetadata(metadata.format.duration),
-                container: isNaNMetadata(metadata.format.format_long_name),
-                sampleRate: isNaNMetadata(metadata.streams[0].sample_rate),
-                title: isNaNMetadata(metadata.format.title),
-                artist: isNaNMetadata(metadata.format.artist),
-                album: isNaNMetadata(metadata.format.album),
-                bitrate: isNaNMetadata(metadata.format.bit_rate),
+                songSize: isNaNMetadata(repeatHasOwnProperty(metadata, 'format', 'size')),
+                duration: isNaNMetadata(repeatHasOwnProperty(metadata, 'format', 'duration')),
+                container: isNaNMetadata(repeatHasOwnProperty(metadata, 'format', 'format_long_name')),
+                sampleRate: isNaNMetadata(repeatHasOwnProperty(metadata, 'streams[0]', 'sample_rate')),
+                title: isNaNMetadata(repeatHasOwnProperty(metadata, 'format', 'tags', 'title')),
+                artist: isNaNMetadata(repeatHasOwnProperty(metadata, 'format', 'tags', 'artist')),
+                album: isNaNMetadata(repeatHasOwnProperty(metadata, 'format', 'tags', 'album')),
+                bitrate: isNaNMetadata(repeatHasOwnProperty(metadata, 'format', 'bit_rate')),
             });
         }
     }
@@ -81,17 +81,17 @@ async function getMusicInfo(songPathAndLrcObj, isAccurate = false) {
             songList.push({
                 path,
                 songSize: info.size,
-                duration: hasOwnPropertyDouble(metadata, 'format', 'duration'),
-                lossless: hasOwnPropertyDouble(metadata, 'format', 'lossless'),
-                container: hasOwnPropertyDouble(metadata, 'format', 'container'),
+                duration: repeatHasOwnProperty(metadata, 'format', 'duration'),
+                lossless: repeatHasOwnProperty(metadata, 'format', 'lossless'),
+                container: repeatHasOwnProperty(metadata, 'format', 'container'),
                 //number采样率，单位为每秒采样数（S/s）
-                sampleRate: hasOwnPropertyDouble(metadata, 'format', 'sampleRate'),
-                title: hasOwnPropertyDouble(metadata, 'common', 'title'),
-                artist: hasOwnPropertyDouble(metadata, 'common', 'artist'),
-                picture: hasOwnPropertyDouble(metadata, 'common', 'picture') ? true : false,
-                album: hasOwnPropertyDouble(metadata, 'common', 'album'),
+                sampleRate: repeatHasOwnProperty(metadata, 'format', 'sampleRate'),
+                title: repeatHasOwnProperty(metadata, 'common', 'title'),
+                artist: repeatHasOwnProperty(metadata, 'common', 'artist'),
+                picture: repeatHasOwnProperty(metadata, 'common', 'picture') ? true : false,
+                album: repeatHasOwnProperty(metadata, 'common', 'album'),
                 //每秒编码音频文件的比特数
-                bitrate: hasOwnPropertyDouble(metadata, 'format', 'bitrate'),
+                bitrate: repeatHasOwnProperty(metadata, 'format', 'bitrate'),
                 lrc: false,
 
                 // path,

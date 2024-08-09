@@ -12,6 +12,7 @@ import { useSongList } from '@/store/musicList';
 import AudioControl from './components/AudioControl.vue';;
 import { usePosition } from './store/position';
 import { useTheme } from './store/theme';
+import { useGlobalKeyup } from './util/globalKeyup';
 const storePos = usePosition();
 const store = useSongList();
 const storeTheme = useTheme();
@@ -27,6 +28,7 @@ onBeforeMount(() => {
   let h = storePos.size[1];
   electron.onGetWinSize(w, h);
 })
+
 onMounted(() => {
   electron.onSetWinSize((e, size) => {
     storePos.size = size;
@@ -116,6 +118,7 @@ function fullScreen() {
 function minimizableHandler() {
   electron.minimizableWin(true);
 }
+useGlobalKeyup(store);
 </script>
 <template>
   <el-container>
@@ -206,28 +209,13 @@ function minimizableHandler() {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-}
-
-.img-container::after {
-  content: '';
-  position: absolute;
-  top: 3px;
-  left: -1px;
-  border: 1px solid var(--el-color-primary-light-6);
-  width: 16px;
-  height: 16px;
-  z-index: 100;
-  border-radius: 50%;
-  transform-origin: center;
-  animation: imgAnimation 2s infinite;
 }
 
 .img-container img {
   width: 100%;
   height: 100%;
+  transform-origin: center;
+  animation: imgAnimation 2s infinite;
 }
 
 .fullScreen-not-full {
