@@ -27,10 +27,23 @@ import { useDrop } from '@/util/drop';
         '#409EFF',
         '#6222C9',
     ];
-
+    // let isPicColorActive=ref(false);
+    let picBtnColor=computed(()=>{
+        if(store.isPicColorActive){
+            return store.selectColor;
+        }else{
+            return '';
+        }
+    })
+    function followPicColorHandler(){
+        store.isPicColorActive=!store.isPicColorActive;
+        if(!store.isPicColorActive)return;
+        store.followPicColor();
+    }
     function selectBtnColor(color){
         const el = document.documentElement;
         const res=hexTransformRGB(color);
+        store.isPicColorActive=false;
         settingCssVar(el,res);
         selectColor.value=color;
     }
@@ -40,7 +53,8 @@ import { useDrop } from '@/util/drop';
         selectBtnColor(selectColor.value)
     }
     async function selectImg(){
-        let img=new Image();
+        // let img=new Image();
+        let img =document.createElement('img');
         img.src = `local-img://background`;
         img.addEventListener('error',function errorHandler(){
             ElMessage({
@@ -58,8 +72,10 @@ import { useDrop } from '@/util/drop';
             });
         });
         const el = document.documentElement;
+        store.isPicColorActive=false;
         settingCssVar(el,rgb)
     }
+
     function setTimeoutHandle(){
         return new Promise((resolve,reject)=>{
             let id=null;
@@ -153,7 +169,7 @@ import { useDrop } from '@/util/drop';
                         </el-radio>
                     </el-radio-group>
 
-                    <div class="theme-color" :key="store.selectColor">
+                    <div class="theme-color">
                         <el-text size="small">主题色：</el-text>
                         <el-popover :width="400" trigger="click"  >
                             <template #reference>
@@ -176,6 +192,11 @@ import { useDrop } from '@/util/drop';
                                 </template>
                             </el-card>
                         </el-popover>
+                    </div>
+
+                    <div>
+                        <el-text size="small">跟随封面色：</el-text>
+                        <el-button  :color="picBtnColor" plain :icon="store.isPicColorActive?Check:''" @click="followPicColorHandler">{{ store.isPicColorActive? store.selectColor :"" }}</el-button>
                     </div>
                     
                     <el-switch

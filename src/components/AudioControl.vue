@@ -98,7 +98,10 @@ watch(() => store.audioInfo.path, async () => {
       this.removeEventListener('load', getColor);
     });
   });
+  storeTheme.picColor=rgb.value;
   storeTheme.controlColor = `rgba(${rgb.value},8)`;
+  if(!storeTheme.isPicColorActive)return;
+  storeTheme.followPicColor();
 }, { immediate: true });
 
 watch(() => store.currentTimeLrc, () => {

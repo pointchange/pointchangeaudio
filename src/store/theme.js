@@ -4,11 +4,12 @@ export const useTheme = defineStore('theme', {
         selectTheme: 'light',
         selectColor: '#409EFF',
         controlColor: 'var(--el-color-primary-light-6)',
+        picColor: '',//00,00,00 
+        isPicColorActive: false,
         fontFamily: 'Microsoft YaHei',
         fontSize: 'medium',
         fontWeight: 400,
         letterSpacing: 'normal',
-        isPicColor: false,
         fontFn: {
             fontFamily: v => `Inter,${v}, Arial, sans-serif`,
             fontSize: v => `var(--el-font-size-${v})`,
@@ -153,9 +154,21 @@ export const useTheme = defineStore('theme', {
                 this[Object.values(this.fontOptionList[i])[0]] = Object.values(this.fontOptionList[i])[1];
                 this.changeFont(Object.values(this.fontOptionList[i])[1], [Object.values(this.fontOptionList[i])[0]])
             }
+        },
+        rgbToHex(str) {
+            let arr = str.split(',')
+            let h = parseInt(arr[0]).toString(16);
+            let e = parseInt(arr[1]).toString(16);
+            let x = parseInt(arr[2]).toString(16);
+            return '#' + h + e + x;
+        },
+        followPicColor() {
+            const el = document.documentElement;
+            this.selectColor = this.rgbToHex(this.picColor);
+            this.settingCssVar(el, this.picColor);
         }
     },
     persist: {
-        paths: ['selectTheme', 'selectColor', 'controlColor', 'fontFamily', 'fontSize', 'fontWeight', 'letterSpacing']
+        paths: ['selectTheme', 'selectColor', 'controlColor', 'isPicColorActive', 'picColor', 'fontFamily', 'fontSize', 'fontWeight', 'letterSpacing']
     }
 })

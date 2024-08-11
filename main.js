@@ -97,8 +97,8 @@ function createWindow() {
             preload: join(__dirnameNew, './preload/index.mjs'),
         },
     });
-    // win.loadURL('http://localhost:5173/');
-    win.loadFile(join(__dirnameNew, './dist/index.html'));
+    win.loadURL('http://localhost:5173/');
+    // win.loadFile(join(__dirnameNew, './dist/index.html'));
 
     ipcMain.handle('on-get-win-size-wh', (e, w, h) => {
         win.setSize(w, h)
@@ -133,7 +133,7 @@ function createWindow() {
     win.on('moved', () => {
         win.webContents.send('on-send-position-xy', win.getPosition());
     })
-    // win.webContents.openDevTools();
+    win.webContents.openDevTools();
 }
 
 ipcMain.handle('on-get-lrc-path', async (e, lrcPath) => {
@@ -150,17 +150,33 @@ ipcMain.handle('on-get-lrc-path', async (e, lrcPath) => {
     // const str = '[00:00.00]' + res.split('[00:00.00]')[1];
     let strArr = res.split('\n') || [];
     let lrcArr = [];
+    let lrcArr2 = [];
     strArr.forEach(str => {
         let time = 0;
+        let time2 = 9;
         let text = '';
-        str.replace(/\[(\d{2}):(\d{2}).(\d{2})\]([^]+)/g, (str, $1, $2, $3, $4) => {
-            time = parseInt($1, 10) * 60 + parseFloat(`${$2}.${$3}`);
-            text = $4;
-        });
+        let newStrArr = str.match(/\[\d{2}:\d{2}.\d{2}\]/g);
+        if (newStrArr !== null && newStrArr.length > 1) {
+            str.replace(/\[(\d{2}):(\d{2}).(\d{2})\]([^]+)/g, (str, $1, $2, $3, $4) => {
+                time = newStrArr[0];
+                time2 = newStrArr[1];
+                text = $4;
+            });
+            lrcArr2.push({
+                time: time2,
+                text
+            })
+        } else {
+            str.replace(/\[(\d{2}):(\d{2}).(\d{2})\]([^]+)/g, (str, $1, $2, $3, $4) => {
+                time = parseInt($1, 10) * 60 + parseFloat(`${$2}.${$3}`);
+                text = $4;
+            });
+        }
         lrcArr.push({
             time,
             text
         })
+        lrcArr = [...lrcArr, ...lrcArr2];
     });
     lrcArr = lrcArr.filter(item => item.text !== '');
     return lrcArr;
@@ -472,8 +488,8 @@ app.whenReady().then(() => {
     });
     tray.setToolTip('PCA');
     const menuList = [
-        { label: '上一首', type: 'normal', click: () => win.webContents.send('on-switch-song', 'pre') },
-        { label: '下一首', type: 'normal', click: () => win.webContents.send('on-switch-song', 'next') },
+        { label: '上一首', type: 'normal', click: () => win.webContents.send('on-switch-song', 'pre'), enabled: isVisual ? true : false },
+        { label: '下一首', type: 'normal', click: () => win.webContents.send('on-switch-song', 'next'), enabled: isVisual ? true : false },
         { label: '退出', type: 'normal', click: () => app.quit() },
     ]
     const contextMenu = Menu.buildFromTemplate(menuList)

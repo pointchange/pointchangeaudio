@@ -123,10 +123,15 @@ useGlobalKeyup(store);
 <template>
   <el-container>
     <el-header>
-      <el-page-header class="header" title="PCA">
+      <el-page-header class="header">
         <template #icon>
           <div class="img-container" @click="clickHandler">
             <img class="img" src="./assets/favicon-16x16.png" alt="">
+          </div>
+        </template>
+        <template #title>
+          <div @click="clickHandler">
+            PCA
           </div>
         </template>
         <template #content>

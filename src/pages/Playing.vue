@@ -5,9 +5,11 @@ import { computed, nextTick, ref, watch } from 'vue';
 
 import FullscreenOnPlaying from '@/components/FullscreenOnPlaying.vue';
 import PicAndSong from '@/components/PicAndSong.vue';
+import { useEmpty } from '@/util/empty';
     const store=useSongList();
     const {getName,countTime,playCurrentMusic}=store;
     const storePos=usePosition();
+    const {isEmpty}=useEmpty(store);
     const elTableRef=ref(null);
     watch(()=>store.audioInfo.path,async(path)=>{
         const data=elTableRef.value.data.filter(item=>item.path===path);
@@ -42,7 +44,7 @@ import PicAndSong from '@/components/PicAndSong.vue';
         name="playing"
         enter-active-class="animate__animated animate__slideInRight"
         leave-active-class="animate__animated animate__slideOutLeft playing-leave-active"
-        appear
+        :appear="isEmpty?false:true"
         >
             <div class="playing" :style="isMaxH" :key="store.audioInfo.path">
                 <PicAndSong v-if="!isFullscreen" :fullscreenHandler="fullscreenHandler" :isShowBg="true" />

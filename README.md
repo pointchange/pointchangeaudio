@@ -60,6 +60,12 @@ list:[
 | [music-metadata](https://github.com/Borewit/music-metadata) | 读取音频元信息 |
 | [animate.css](https://animate.style/) | 控制动画 |
 
+## 版本0.1.2
+
+1. 新增跟随封面色。
+
+2. 优化lrc歌词双时间同一段文字的匹配。
+
 ## 版本0.1.1
 
 1. 新增全局按键控制播放、下一首、上一首。
