@@ -26,6 +26,7 @@ export const useSongList = defineStore('song-list', {
         savePlayedSongs: [],
         savePlayedSongsIndex: 0,
         pre: false,
+        loading: false,
     }),
     getters: {
         isEmpty: state => state.songs.length,
@@ -137,8 +138,10 @@ export const useSongList = defineStore('song-list', {
             } else {
                 this.songs = this.availebleSongs(newList)
             }
+            this.loading = false;
         },
         async addDirectory() {
+            this.loading = true;
             const result = await electron.openDirectory().catch(error => {
                 if (String(error).includes('@')) {
                     ElMessage.error(String(error).split('@')[1])
@@ -166,7 +169,11 @@ export const useSongList = defineStore('song-list', {
 
             return (hour > 0 ? `${hour}:` : '') + `${min}:${second}`;
         },
-
+        hasElementEvent(EventName, element) {
+            if (!(EventName in element)) {
+                this.init();
+            }
+        },
         async playCurrentMusic(path) {
             if (!this.pre) {
                 this.savePlayedSongs.push(path);
@@ -246,8 +253,9 @@ export const useSongList = defineStore('song-list', {
         play() {
             this.isPlaying = true;
             this.isPlay = true;
-            this.audio.volume = 0;
-            let index = 0;
+            // this.audio.volume = 0;
+            // let index = 0;
+            // this.changeVolume(index);
             if (!this.audio.src) {
                 this.playCurrentMusic(this.save.path);
                 let that = this;
@@ -258,35 +266,35 @@ export const useSongList = defineStore('song-list', {
             }
             electron.changeTrayIcon(true);
             this.audio.play();
-            let id = setInterval(() => {
-                if (index === 100) {
-                    clearInterval(id);
-                    id = null;
-                    return;
-                }
-                index++;
-                this.changeVolume(index);
-            }, 20);
+            // let id = setInterval(() => {
+            //     if (index === 100) {
+            //         clearInterval(id);
+            //         id = null;
+            //         return;
+            //     }
+            //     index++;
+            //     this.changeVolume(index);
+            // }, 20);
         },
         changeProgress(v) {
             this.audio.currentTime = v;
         },
         switchSong(path, num) {
-            const len = this.find('').length - 1;
+            const len = this.songs.length - 1;
             if (len === -1) return;
-            const index = this.find('').findIndex(item => item.path === path);
+            const index = this.songs.findIndex(item => item.path === path);
             if (index === (num !== 0 ? len : 0)) {
-                this.playCurrentMusic(this.find('')[num !== 0 ? 0 : len].path);
+                this.playCurrentMusic(this.songs[num !== 0 ? 0 : len].path);
             } else {
                 switch (this.playOrder) {
                     case 0:
-                        this.playCurrentMusic(this.find('')[num !== 0 ? index + 1 : index - 1].path);
+                        this.playCurrentMusic(this.songs[num !== 0 ? index + 1 : index - 1].path);
                         break;
                     case 1:
-                        this.playCurrentMusic(this.find('')[parseInt(Math.random() * len)].path);
+                        this.playCurrentMusic(this.songs[parseInt(Math.random() * len)].path);
                         break;
                     case 2:
-                        this.playCurrentMusic(this.find('')[index].path);
+                        this.playCurrentMusic(this.songs[index].path);
                         break;
                 }
             }

@@ -1,6 +1,6 @@
 <script setup>
 import {
-  Promotion
+  Promotion,Loading
 } from '@element-plus/icons-vue';
 import { ElMessage,ElMessageBox } from 'element-plus'
 import { ref,computed, watch } from 'vue';
@@ -83,7 +83,7 @@ async function accurateGetAudioInfo(path){
 </script>
 <template>
   <el-table ref="elTableRef" :data="find(search)"  highlight-current-row
-  style="width: 100%;" size="large"
+  style="width: 100%;" size="large" empty-text="点击右下角 '+' 添加文件夹"
   @row-dblclick="({path})=>playCurrentMusic(path)"
   :max-height="storePos.clientHeight-160"
   @drop.prevent="dropHandler"
@@ -129,7 +129,13 @@ async function accurateGetAudioInfo(path){
         </el-descriptions>
       </template>
     </el-table-column>
-    <el-table-column :label="fileAndlen" show-overflow-tooltip>
+    <el-table-column  show-overflow-tooltip>
+      <template #header>
+        <el-space wrap style="flex-wrap: nowrap;">
+          <el-icon v-if="store.loading" class="loading"><Loading /></el-icon>
+          <span>{{ fileAndlen }}</span>
+        </el-space>
+      </template>
       <template #default="scope">
         {{ getName(scope.row.path,'',true) }}
       </template>
@@ -139,7 +145,7 @@ async function accurateGetAudioInfo(path){
         {{scope.row.title?scope.row.title:'未知' }}
       </template>
     </el-table-column> -->
-    <el-table-column label="作者">
+    <el-table-column label="作者" >
       <template #default="scope">
         {{scope.row.artist?scope.row.artist:'未知' }}
       </template>
@@ -168,6 +174,10 @@ async function accurateGetAudioInfo(path){
   </Teleport>
 </template>
 <style scoped>
+    .loading{
+      transform-origin: center;
+      animation: imgAnimation 2s infinite;
+    }
     .artist{
       width: fit-content;
     }

@@ -97,8 +97,8 @@ function createWindow() {
             preload: join(__dirnameNew, './preload/index.mjs'),
         },
     });
-    win.loadURL('http://localhost:5173/');
-    // win.loadFile(join(__dirnameNew, './dist/index.html'));
+    // win.loadURL('http://localhost:5173/');
+    win.loadFile(join(__dirnameNew, './dist/index.html'));
 
     ipcMain.handle('on-get-win-size-wh', (e, w, h) => {
         win.setSize(w, h)
@@ -133,7 +133,7 @@ function createWindow() {
     win.on('moved', () => {
         win.webContents.send('on-send-position-xy', win.getPosition());
     })
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
 }
 
 ipcMain.handle('on-get-lrc-path', async (e, lrcPath) => {

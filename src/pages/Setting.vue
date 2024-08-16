@@ -11,6 +11,7 @@ import FontOption from '@/components/FontOption.vue';
 import Image from '@/components/Image.vue';
 import { useSetting } from '@/store/setting';
 import { useDrop } from '@/util/drop';
+import { useRandomType } from '@/util/randomType';
 //#409eff --el-color-primary  --el-slider-main-bg-color  --el-tag-text-color
 //#67c23a --el-color-success #f0f9eb --el-color-success-light-9 #b3e19d--el-color-success-light-5
 //#95d475 --el-color-success-light-3
@@ -103,11 +104,22 @@ import { useDrop } from '@/util/drop';
         storeSongs.audio.removeEventListener('timeupdate', storeSongs.timeupdateHandler);
         storeSongs.$reset();
 
+        store.isPicColorActive=false;
+        selectBtnColor('#409EFF');
+
+        await resetHandler()
         store.$reset();
         store.switchTheme();
+
+        
+        await resetImageHandler()
+        await resetFontHandler()
         sotreFormat.$reset();
 
-        resetAngthing.value= await setTimeoutHandle()
+        //new audio 是新的 init()也要重新调用
+        storeSongs.init();
+
+        resetAngthing.value= await setTimeoutHandle();
     }
     let resetFont=ref(false);
     async function resetFontHandler(){
@@ -145,6 +157,20 @@ import { useDrop } from '@/util/drop';
         resetImage.value= await setTimeoutHandle();
     }
     const imgFitList=['fill','contain','cover','none','scale-down',];
+    const globalKey=[
+        {
+            control:'上一首',
+            key:'Alt+ArrowLeft',
+        },
+        {
+            control:'开始/暂停',
+            key:'space'
+        },
+        {
+            control:'下一首',
+            key:'Alt+ArrowRight'
+        },
+    ]
 </script>
 <template>
     <el-scrollbar >
@@ -257,8 +283,18 @@ import { useDrop } from '@/util/drop';
                         <Image class="right" :src="false"/>
                     </div>
                 </div>
+                <el-divider />
+                <div class="global_key">
+                    <el-text size="small">应用内的全局按键控制</el-text>
+                    <div class="tag_container">
+                        <el-tag :type="useRandomType(Math.random())" v-for="item in globalKey" :key="item.control">
+                            {{ item.control }}: {{ item.key }}
+                        </el-tag>
+                    </div>
+                    
+                </div>
             </div>
-            <el-text style="color:var(--el-color-primary-light-4);" size="small">©point change audio 仅用于学习与交流</el-text>
+            <el-text class="copyright" style="color:var(--el-color-primary-light-4);" size="small">©point change audio 仅用于学习与交流</el-text>
         </div>
     </el-scrollbar>
 </template>
@@ -368,5 +404,14 @@ import { useDrop } from '@/util/drop';
     .footer{
         display: flex; 
         justify-content: space-around;
+    }
+    .tag_container{
+        margin-top: 1rem;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    .copyright{
+        margin-top: 1rem;
     }
 </style>

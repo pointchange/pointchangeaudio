@@ -1,7 +1,6 @@
 import { onMounted, onUnmounted } from "vue";
 import { useEmpty } from "./empty";
 
-
 export function useGlobalKeyup(store) {
     const {
         isEmpty

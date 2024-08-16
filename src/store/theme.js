@@ -164,6 +164,7 @@ export const useTheme = defineStore('theme', {
         },
         followPicColor() {
             const el = document.documentElement;
+            if (!this.picColor) return;
             this.selectColor = this.rgbToHex(this.picColor);
             this.settingCssVar(el, this.picColor);
         }

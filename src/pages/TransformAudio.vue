@@ -5,20 +5,13 @@ import { useFormat } from '@/store/format';
 import {ref,nextTick } from 'vue';
 import TransformAudioCard from '@/components/TransformAudioCard.vue';
 import { useSongList } from '@/store/musicList';
-
+import { useRandomType } from '@/util/randomType';
 const storeSongs=useSongList();
 
 const activeName = ref('transform')
 const store=useFormat();
 const selectValue = ref('');
 
-const typeList=[
-  'primary',
-  'success',
-  'info',
-  'warning',
-  'danger',
-];
 const inputValue = ref('')
 const inputVisible = ref(false)
 const InputRef = ref(null)
@@ -149,7 +142,7 @@ const transformDoc=[
         </template>
         <div class="tag-container">
           <el-text size="large">自定义格式：</el-text>
-          <el-tag v-for="tag in store.formatList" :key="tag" closable :type="typeList[parseInt(Math.random()*typeList.length)]"
+          <el-tag v-for="tag in store.formatList" :key="tag" closable :type="useRandomType(Math.random())"
           @close="handleClose(tag)" >
             {{ tag }}
           </el-tag>
