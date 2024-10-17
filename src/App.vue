@@ -188,7 +188,7 @@ useGlobalKeyup(store);
       </el-aside>
       <el-main :style="{ height: (storePos.clientHeight - 160) + 'px' }">
         <RouterView v-slot="{ Component }">
-          <KeepAlive include="MusicList">
+          <KeepAlive include="MusicList,TransformAudio">
             <component :is="Component" />
           </KeepAlive>
         </RouterView>
