@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { ElMessage, ElMessageBox } from 'element-plus'
+// import { useTheme } from './theme';
 export const useSongList = defineStore('song-list', {
     state: () => ({
         songs: [
@@ -59,7 +60,9 @@ export const useSongList = defineStore('song-list', {
         }
     },
     actions: {
-        init() {
+        async init() {
+            const { useTheme } = await import('./theme');
+
             this.audio.addEventListener('error', () => {
                 ElMessageBox.confirm(`可能是有不支持的音频文件，也可能是音频文件不存在。是否要移除当前 ${this.audioInfo.path}的文件`, '播放失败',
                     {
@@ -106,6 +109,10 @@ export const useSongList = defineStore('song-list', {
                         currentTime: this.audioInfo.currentTime,
                     }
                 }
+                if (!this.audioInfo.pic) return;
+                //如果要绑定的函数或对象已经被添加到列表中，该函数或对象不会被再次添加。
+                useTheme().img.addEventListener('load', useTheme().imgLoad);
+                useTheme().img.src = `local-img://picture${this.audioInfo.path}`;
             });
             this.audio.addEventListener('timeupdate', this.timeupdateHandler);
             this.audio.addEventListener('ended', () => {

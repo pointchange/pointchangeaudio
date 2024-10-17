@@ -60,6 +60,14 @@ list:[
 | [music-metadata](https://github.com/Borewit/music-metadata) | 读取音频元信息 |
 | [animate.css](https://animate.style/) | 控制动画 |
 
+## 版本0.1.3
+
+1. 修复并移除"上一首"、"下一首" 在可视化的操作。
+
+2. 修复歌词读取错误
+
+3. 新增单一歌曲的歌词增加或者修改
+
 ## 版本0.1.2
 
 1. 新增跟随封面色。

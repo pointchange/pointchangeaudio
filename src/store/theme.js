@@ -1,4 +1,7 @@
 import { defineStore } from 'pinia';
+// import { useSongList } from './musicList';
+import getImageColor from '@/util/getImageColor';
+// const songOption = useSongList();
 export const useTheme = defineStore('theme', {
     state: () => ({
         selectTheme: 'light',
@@ -39,8 +42,8 @@ export const useTheme = defineStore('theme', {
                 option: 'letterSpacing',
                 init: 'normal',
             },
-        ]
-
+        ],
+        img: new Image()
     }),
     actions: {
         init() {
@@ -52,6 +55,16 @@ export const useTheme = defineStore('theme', {
                 let prop = Object.values(this.fontOptionList[i])[0];
                 this.changeFont(Object.values(this[prop])[0], prop)
             }
+            this.img.addEventListener('load', this.imgLoad);
+        },
+
+        imgLoad() {
+            if (!this.img.src) return;
+            const rgb = getImageColor(this.img);
+            this.picColor = rgb;
+            this.controlColor = `rgba(${rgb},8)`;
+            if (!this.isPicColorActive) return;
+            this.followPicColor();
         },
         switchTheme(e) {
             const html = document.querySelector('html');

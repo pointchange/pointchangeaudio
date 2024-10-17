@@ -34,7 +34,6 @@ import { getMusicInfo } from './util/getSongInfo.js';
 const __filenameNew = fileURLToPath(import.meta.url);
 
 const __dirnameNew = path.dirname(__filenameNew);
-
 const iconsPath = {
     pause: join(__dirnameNew, './images/pause.png'),
     play: join(__dirnameNew, './images/play.png'),
@@ -83,6 +82,25 @@ protocol.registerSchemesAsPrivileged([
         }
     }
 ])
+
+Menu.setApplicationMenu(null);
+let isVisual = false;
+const preAndNext = {
+    pre: '上一首',
+    next: '下一首',
+}
+const menuList = [
+    { id: '上一首', label: '上一首', type: 'normal', click: () => win.webContents.send('on-switch-song', 'pre'), enabled: !isVisual },
+    { id: '下一首', label: '下一首', type: 'normal', click: () => win.webContents.send('on-switch-song', 'next'), enabled: !isVisual },
+    { label: '退出', type: 'normal', click: () => app.quit() },
+]
+const contextMenu = Menu.buildFromTemplate(menuList);
+
+function setMenuItemProp(contextMenu, MenuItem, props, bool) {
+    const item = contextMenu.getMenuItemById(MenuItem)
+    item[props] = bool;
+}
+
 let win;
 function createWindow() {
     win = new BrowserWindow({
@@ -145,7 +163,10 @@ ipcMain.handle('on-get-lrc-path', async (e, lrcPath) => {
         rs.on('error', error => {
             reject(error);
         })
+    }).catch(e => {
+        return [];
     })
+    if (!res.length > 0) return res;
     // const str = res.replace(/\[[^]+\]\n/, '');
     // const str = '[00:00.00]' + res.split('[00:00.00]')[1];
     let strArr = res.split('\n') || [];
@@ -239,13 +260,12 @@ ipcMain.handle('on-open-directory', async () => {
     let songPathAndLrcObj = await filterNotSongType(getAudioFileArray);
     return await getMusicInfo(songPathAndLrcObj)
 })
-let isVisual = false;
 
 ipcMain.handle('on-open-file-place', async (e, path) => {
     shell.showItemInFolder(path);
 });
-ipcMain.handle('on-drag-enter-song', async (e, filePathList) => {
-    let songList = await getMusicInfo({ filePathList })
+ipcMain.handle('on-drag-enter-song', async (e, pathObj) => {
+    let songList = await getMusicInfo({ songPathArr: pathObj.songPathArr })
     return songList;
 })
 ipcMain.handle('on-transform-format', async (e, path, name, format) => {
@@ -288,6 +308,9 @@ let winChild;
 ipcMain.handle('on-create-win', (e, arr, obj) => {
     win.hide();
     isVisual = true;
+    Object.keys(preAndNext).forEach(item => {
+        setMenuItemProp(contextMenu, preAndNext[item], 'visible', !isVisual)
+    })
     winChild = new BrowserWindow({
         width: 350,
         height: 250,
@@ -323,6 +346,9 @@ ipcMain.handle('on-init-open', (e, position) => {
 
 ipcMain.handle('on-visual-close', (e, currentSongInfo) => {
     isVisual = false;
+    Object.keys(preAndNext).forEach(item => {
+        setMenuItemProp(contextMenu, preAndNext[item], 'visible', !isVisual)
+    })
     win.show();
     winChild.close();
     win.webContents.send('on-visual-close-info', currentSongInfo);
@@ -332,36 +358,52 @@ ipcMain.handle('on-accurate-get-audio-info', async (e, pathList) => {
     return await getMusicInfo({ songPathArr: pathList }, true)
 });
 
-Menu.setApplicationMenu(null);
-let tray = null;
+ipcMain.handle('on-add-Set-lrc', async () => {
+    win.focus();
+    const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+        title: '选择文件',
+        properties: ['openFile', 'showHiddenFiles'],
+        buttonLabel: '确认'
+    })
+    if (canceled) return `取消添加`;
+    return filePaths[0];
+});
+
 
 app.whenReady().then(() => {
     createWindow();
 
     protocol.handle('local-audio', async (request) => {
         let rightPath = request.url.replace(/local-audio:\/\/(\w)/, '$1' + ':');
-        const info = await stat(decodeURI(rightPath)).catch(e => {
-            dialog.showErrorBox('播放出错', `应用找不到 ${decodeURI(rightPath)} 文件`)
+        let path = decodeURI(rightPath);
+        const info = await stat(path).catch(e => {
+            dialog.showErrorBox('播放出错', `应用找不到 ${path} 文件`)
         })
         if (!info) return;
         let start = Number(request.headers.get('range').split('=')[1].split('-')[0]);
         let end = info.size - 1;
-        const rs = createReadStream(decodeURI(rightPath), { start, end });
+        const rs = createReadStream(path, { start, end });
 
-        const response = new Response(rs);
+        const response = new Response(rs, {
+            headers: {
+                "Connection": 'keep-alive',
+                //audio/mpeg 不完善写法
+                "Content-Type": 'audio/mpeg',
+                "Access-Control-Allow-Credentials": "true",
+                "Accept-Ranges": "bytes"
+            }
+        });
 
-        response.headers.set("Accept-Ranges", "bytes");
+        // response.headers.set("Accept-Ranges", "bytes");
         if (start == 0) {
             response.headers.set("Content-Length", `${info.size}`);
         } else {
             response.headers.set("Content-Length", `${end - start + 1}`);
         }
-        response.headers.set("Content-Range", `${start}-${end}/${info.size - 1}`);
-        response.headers.set('Connection', 'keep-alive')
-        response.headers.set("Content-Type", "audio/mpeg;charset=UTF-8");
-        response.headers.set("Access-Control-Allow-Credentials", "true")
-        response.headers.set("Keep-Alive", "timeout=5")
-        response.headers.set("Cache-Control", "public, max-age=0")
+        response.headers.set("Content-Range", `${start}-${end}/${info.size}`);
+        // response.headers.set('Connection', 'keep-alive')
+        // response.headers.set("Content-Type", "audio/mpeg");
+        // response.headers.set("Access-Control-Allow-Credentials", "true")
         return response;
     })
     protocol.handle('local-img', async (request) => {
@@ -448,6 +490,7 @@ app.whenReady().then(() => {
 
     let timeId = null
     let isPlay = false;
+    let tray = null;
 
     tray = new Tray(iconsPath.pause);
     ipcMain.handle('on-change-tray-icon', (e, bool) => {
@@ -458,6 +501,7 @@ app.whenReady().then(() => {
         isPlay = bool;
         isPlay ? tray.setImage(iconsPath.play) : tray.setImage(iconsPath.pause);
     });
+
     tray.on('click', () => {
         if (isVisual) {
             isPlay = !isPlay;
@@ -487,14 +531,8 @@ app.whenReady().then(() => {
         win.show();
     });
     tray.setToolTip('PCA');
-    const menuList = [
-        { label: '上一首', type: 'normal', click: () => win.webContents.send('on-switch-song', 'pre'), enabled: isVisual ? true : false },
-        { label: '下一首', type: 'normal', click: () => win.webContents.send('on-switch-song', 'next'), enabled: isVisual ? true : false },
-        { label: '退出', type: 'normal', click: () => app.quit() },
-    ]
-    const contextMenu = Menu.buildFromTemplate(menuList)
 
-    tray.setContextMenu(contextMenu)
+    tray.setContextMenu(contextMenu);
 
 });
 

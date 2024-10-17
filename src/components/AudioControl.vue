@@ -8,7 +8,6 @@ import { ref, onMounted, watch } from 'vue';
 import { useSongList } from '@/store/musicList';
 import Image from './Image.vue';
 import { useRouter } from 'vue-router';
-import getImageColor from '@/util/getImageColor';
 import { useTheme } from '@/store/theme';
 import ControlBtn from './ControlBtn.vue';
 import ProgressBar from './ProgressBar.vue';
@@ -84,25 +83,25 @@ const route = useRouter();
 function openPlayingPage() {
   route.push('/playing');
 }
-let rgb = ref('');
+// let rgb = ref('');
 const storeTheme = useTheme();
-watch(() => store.audioInfo.path, async () => {
-  if (!store.audioInfo.pic) return;
-  let img = document.createElement('img');
-  // let img = new Image();
-  img.src = `local-img://picture${store.audioInfo.path}`;
+// watch(() => store.audioInfo.path, async () => {
+//   if (!store.audioInfo.pic) return;
+//   let img = document.createElement('img');
+//   // let img = new Image();
+//   img.src = `local-img://picture${store.audioInfo.path}`;
 
-  rgb.value = await new Promise((resolve, reject) => {
-    img.addEventListener('load', function getColor() {
-      resolve(getImageColor(this));
-      this.removeEventListener('load', getColor);
-    });
-  });
-  storeTheme.picColor=rgb.value;
-  storeTheme.controlColor = `rgba(${rgb.value},8)`;
-  if(!storeTheme.isPicColorActive)return;
-  storeTheme.followPicColor();
-}, { immediate: true });
+//   rgb.value = await new Promise((resolve, reject) => {
+//     img.addEventListener('load', async function getColor() {
+//       resolve(await getImageColor(this));
+//       this.removeEventListener('load', getColor);
+//     });
+//   });
+//   storeTheme.picColor=rgb.value;
+//   storeTheme.controlColor = `rgba(${rgb.value},8)`;
+//   if(!storeTheme.isPicColorActive)return;
+//   storeTheme.followPicColor();
+// }, { immediate: true });
 
 watch(() => store.currentTimeLrc, () => {
   if(!store.isShowLrc)return;

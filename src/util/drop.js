@@ -45,7 +45,6 @@ export function useDrop(store, str = 'audio') {
             if (res) {
                 store.imagePath = res;
             }
-
         }
     }
     let ele = null;

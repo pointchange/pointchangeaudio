@@ -80,6 +80,22 @@ async function accurateGetAudioInfo(path){
     }
   }
 }
+
+function openLrcDir(path){
+  if(path){
+    electron.openFilePlace(path)
+  }
+} 
+
+async function addAndSetLrc(path){
+  const res=await electron.addAndSetLrc();
+  //增加/修改当前path lrc
+  store.songs.map(v=>{
+    if(v.path===path){
+      v.lrc=res;
+    }
+  })
+}
 </script>
 <template>
   <el-table ref="elTableRef" :data="find(search)"  highlight-current-row
@@ -120,6 +136,12 @@ async function accurateGetAudioInfo(path){
           <el-descriptions-item label="采样率，单位为每秒采样数（S/s）">
             {{ props.row.sampleRate }}
           </el-descriptions-item>
+          <el-descriptions-item label="歌词" :span="3">
+            <el-space wrap>
+              <el-link type="success" @click="openLrcDir(props.row.lrc)">{{ props.row.lrc||'暂无歌词' }}</el-link>
+              <el-button type="primary" plain @click="addAndSetLrc(props.row.path)">增加 / 修改</el-button>
+            </el-space>
+          </el-descriptions-item>
           <el-descriptions-item label="路径" :span="3">
             <el-link type="success" @click="openFileHandler(props)">{{ props.row.path }}</el-link>
           </el-descriptions-item>
@@ -129,7 +151,7 @@ async function accurateGetAudioInfo(path){
         </el-descriptions>
       </template>
     </el-table-column>
-    <el-table-column  show-overflow-tooltip>
+    <el-table-column  show-overflow-tooltip >
       <template #header>
         <el-space wrap style="flex-wrap: nowrap;">
           <el-icon v-if="store.loading" class="loading"><Loading /></el-icon>

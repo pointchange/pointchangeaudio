@@ -1,6 +1,6 @@
 <script setup>
 import { UploadFilled, Check } from '@element-plus/icons-vue'
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
 import { ElMessage} from 'element-plus'
 import { useTheme } from '@/store/theme';
 import { storeToRefs } from 'pinia';
@@ -67,8 +67,8 @@ import { useRandomType } from '@/util/randomType';
         let rgb='';
         
         rgb=await new Promise((resolve,reject)=>{
-            img.addEventListener('load',function getColor(){
-                resolve(getImageColor(this));
+            img.addEventListener('load', function getColor(){
+                resolve( getImageColor(this));
                 this.removeEventListener('load',getColor);
             });
         });
